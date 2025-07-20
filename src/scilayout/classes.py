@@ -2,6 +2,7 @@
 """
 from matplotlib import figure
 from matplotlib.axes import Axes
+from matplotlib.pyplot import close as pltclose
 from matplotlib.text import Text
 
 from . import base, locations, style
@@ -99,6 +100,11 @@ class SciFigure(figure.Figure):
         :param kwargs: Additional arguments to pass to savefigure
         """
         base.savefigure(self, savepath, **kwargs)
+    
+    
+    def close(self):
+        """Convenience functino to close figure window"""
+        pltclose(self)
 
 
 class PanelAxes(Axes):
