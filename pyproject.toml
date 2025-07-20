@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "scilayout"
-version = "0.0.1-alpha"
+version = "0.0.1b1"
 authors = [{name = "George Stuyt"}]
 description = "Create axes from top left of figure in centimetres to simplify scientific figure generation"
 dependencies = ["matplotlib", "numpy"]
