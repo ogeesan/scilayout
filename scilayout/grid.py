@@ -28,6 +28,7 @@ class GuideGridClass:
         self.minor_interval = minor_interval
         self.half_spacer = half_spacer
         self.lines = dict(x=dict(), y=dict())  # Store the lines for easy access
+        self.line_kwargs = dict(color='k', lw=0.5, alpha=0.3)  # Default line appearance
         self.major_scatter = None
         self.minor_scatter = None
         self.half_scatter = None
