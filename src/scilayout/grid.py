@@ -8,7 +8,7 @@ class GuideGridClass:
     """Handle the creation of a grid overlay for a figure
     Grid overlay assist in positioning the elements of a figure.
     
-    Note that the design of this class is tightly intertwined with the SciFigure class (e.g. removal of axes and clear methods)
+    Note that the design of this class is tightly coupled with the SciFigure class (e.g. removal of axes and clear methods)
     """
     def __init__(self, figure, major_interval=5, minor_interval=1, half_spacer=True):
         """Create a grid overlay for a figure

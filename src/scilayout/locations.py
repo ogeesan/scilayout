@@ -1,5 +1,4 @@
-"""
-Convert between cm, inch, and fraction locations in matplotlib figures
+"""Convert between cm, inch, and fraction locations in matplotlib figures
 """
 
 import numpy as np

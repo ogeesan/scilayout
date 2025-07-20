@@ -140,6 +140,7 @@ class PanelAxes(Axes):
 
     def get_location(self):
         """Get location of axes in cm (from top left corner)"""
+        # todo: use self.get_figure().transCM?
         figsize = locations.inch_to_cm(self.get_figure().get_size_inches())
         bbox_pos = self.get_position().get_points()
         xmin, ymax = bbox_pos[0]

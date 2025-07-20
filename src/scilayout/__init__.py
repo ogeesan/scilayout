@@ -1,4 +1,4 @@
-__version__ = "a0.1.0"
+__version__ = "0.1.0"
 # Import dependencies
 import matplotlib.pyplot as plt
 
