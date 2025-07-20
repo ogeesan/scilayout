@@ -1,16 +1,19 @@
 [build-system]
-requires = ["setuptools >= 77.0.3"]
+requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "scilayout"
-version = "0.0.1b4"
+dynamic = ["version"]
 authors = [{name = "George Stuyt"}]
 description = "Create axes from top left of figure in centimetres to simplify scientific figure generation"
 dependencies = ["matplotlib", "numpy"]
 readme = "README.rst"
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE"] 
+
+[tool.setuptools.dynamic]
+version = {attr = "scilayout.__version__"}
 
 [tool.setuptools.packages.find]
 exclude = ["tests*"]
