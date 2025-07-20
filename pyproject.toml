@@ -21,7 +21,6 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Framework :: Matplotlib",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Programming Language :: Python",
     "Topic :: Artistic Software",
     "Topic :: Multimedia :: Graphics :: Presentation",
@@ -31,6 +30,7 @@ classifiers = [
 [project.urls]
 Repository = "https://github.com/ogeesan/scilayout.git"
 Issues = "https://github.com/ogeesan/scilayout/issues"
+# homepage = 
 
 [tool.setuptools.packages.find]
 where = ["src"]
