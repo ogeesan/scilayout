@@ -25,8 +25,8 @@ class TestPanelLabels(unittest.TestCase):
         self.assertEqual(self.panellabel.xoffset, xoffset)
         self.assertEqual(self.panellabel.yoffset, yoffset)
         pos = self.panellabel.get_location()
-        self.assertAlmostEquals(pos[0], 1 + xoffset)
-        self.assertAlmostEquals(pos[1], 2 + yoffset)
+        self.assertAlmostEqual(pos[0], 1 + xoffset)
+        self.assertAlmostEqual(pos[1], 2 + yoffset)
         
 
     def test_panel_reposition(self):
@@ -35,8 +35,8 @@ class TestPanelLabels(unittest.TestCase):
         xoffset = scilayout.style.params['panellabel.xoffset']
         yoffset = scilayout.style.params['panellabel.yoffset']
         pos = self.panellabel.get_location()
-        self.assertAlmostEquals(pos[0], 2 + xoffset)
-        self.assertAlmostEquals(pos[1], 3 + yoffset)
+        self.assertAlmostEqual(pos[0], 2 + xoffset)
+        self.assertAlmostEqual(pos[1], 3 + yoffset)
     
     
     def test_set_location(self):
@@ -44,18 +44,18 @@ class TestPanelLabels(unittest.TestCase):
         # Test x position
         self.panellabel.set_location(x=3)
         pos = self.panellabel.get_location()
-        self.assertAlmostEquals(pos[0], 3)
+        self.assertAlmostEqual(pos[0], 3)
         
         # Test y position
         self.panellabel.set_location(y=4.2)
         pos = self.panellabel.get_location()
-        self.assertAlmostEquals(pos[1], 4.2)
+        self.assertAlmostEqual(pos[1], 4.2)
         
         # Test both x and y location changes
         self.panellabel.set_location(x=1.5, y=2.5)
         pos = self.panellabel.get_location()
-        self.assertAlmostEquals(pos[0], 1.5)
-        self.assertAlmostEquals(pos[1], 2.5)
+        self.assertAlmostEqual(pos[0], 1.5)
+        self.assertAlmostEqual(pos[1], 2.5)
     
 
 if __name__ == '__main__':
