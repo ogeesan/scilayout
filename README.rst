@@ -1,7 +1,7 @@
 What is ``scilayout``?
 ======================
 
-🚧 Under construction, and the `pip` install is non-functional at this time.
+`pip install scilayout`
 
 Scilayout is a Python package to make creating multi-panel scientific figures easier, faster, and maybe a little bit more fun.
 The core idea is to build figures using coordinates in **centimetres from the top left** using interactive plotting.
