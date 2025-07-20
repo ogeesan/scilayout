@@ -12,8 +12,10 @@ readme = "README.rst"
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE"] 
 
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["scilayout"]
+exclude = ["tests*"]
+
 [tool.setuptools.dynamic]
 version = {attr = "scilayout.__version__"}
-
-[tool.setuptools.packages.find]
-exclude = ["tests*"]
