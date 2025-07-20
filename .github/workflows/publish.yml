@@ -3,6 +3,25 @@ name: Publish Python 🐍 distribution 📦 to PyPI and TestPyPI
 on: push
 
 jobs:
+  test:
+    name: Run unit tests
+    runs
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+    - name: Install dependencies
+      run: python -m pip install --upgrade pip setuptools matplotlib numpy
+    - name: Add utilites to path
+      shell: bash
+      run: 'tests\' >> $GITHUB_PATH
+    - name: Test with pytest
+      run: |
+        pip install pytest
+        pytest tests/
+
   build:
     name: Build distribution 📦
     runs-on: ubuntu-latest
