@@ -2,7 +2,7 @@ import unittest
 
 from matplotlib.pyplot import close
 
-from . import utils
+from tests import utils
 utils.add_parent_dir_to_sys_path()
 
 import scilayout

@@ -6,7 +6,7 @@ import os
 import matplotlib.pyplot as plt
 from xml.etree import ElementTree as ET
 
-from . import utils
+from tests import utils
 utils.add_parent_dir_to_sys_path()
 
 import scilayout
