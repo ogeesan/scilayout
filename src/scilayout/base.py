@@ -126,7 +126,7 @@ def savefigure(
         fpath = Path(fpath)
     if fpath.exists():
         if allow_overwrite:
-            print(f"Overwriting {fpath}") # TODO: use logging to display messages
+            print(f"Overwriting {fpath}")  # TODO: use logging to display messages
         else:
             msg = f"{fpath} already exists, set allow_overwrite=True to overwrite"
             raise FileExistsError(msg)
@@ -138,6 +138,7 @@ def savefigure(
         "transparent": True,  # No background colour
         "dpi": dpi,
     }
+    # TODO: investigate savefig preventing update of plot in qt5 backend until click on fig
 
     if fig_fmt in [".pdf", ".eps"]:
         metadata = {  # Cleaning this metadata makes version control easier
@@ -168,10 +169,12 @@ def add_cm_overlay_grid(
     figure: mpl.figure.Figure,
     width_cm: float | None = None,
     height_cm: float | None = None,
-) -> tuple[mpl.axes.Axes,
-           mpl.collections.PathCollection,
-           mpl.collections.PathCollection,
-           mpl.collections.PathCollection]:
+) -> tuple[
+    mpl.axes.Axes,
+    mpl.collections.PathCollection,
+    mpl.collections.PathCollection,
+    mpl.collections.PathCollection,
+]:
     """Add an overlay to view the cm size of all items on the figure.
 
     :param figure: figure to overlay a grid onto
@@ -194,7 +197,9 @@ def add_cm_overlay_grid(
 
     # Create an axes spanning the entire grid
     ax = figure.add_axes(
-        [0, 0, 1, 1], label="cm_overlay", frameon=False,
+        [0, 0, 1, 1],
+        label="cm_overlay",
+        frameon=False,
     )  # No axis lines
     ax.set_navigate(
         False,
@@ -214,18 +219,16 @@ def add_cm_overlay_grid(
     # Create 1cm mesh grid, make the 1cm markers and smaller 0.5 cm markers
     mesh = np.meshgrid(xlocs, ylocs)
     # Plot 1cm markers
-    sax_1cm = ax.scatter(mesh[0], mesh[1],
-                         alpha=0.3, color="k", s=5, marker="+")
+    sax_1cm = ax.scatter(mesh[0], mesh[1], alpha=0.3, color="k", s=5, marker="+")
 
     # Plot 0.5cm markers
     sax_05cm = ax.scatter(
-        mesh[0] + 0.5, mesh[1] + 0.5,
-        marker="x", color="k", alpha=0.3, s=5, lw=0.3)
+        mesh[0] + 0.5, mesh[1] + 0.5, marker="x", color="k", alpha=0.3, s=5, lw=0.3
+    )
 
     # Create 5cm mesh grid
     mesh5 = np.meshgrid(xlocs[::5], ylocs[::5])
-    sax_5cm = ax.scatter(mesh5[0], mesh5[1],
-                         color="k", marker="+", lw=2, alpha=0.3)
+    sax_5cm = ax.scatter(mesh5[0], mesh5[1], color="k", marker="+", lw=2, alpha=0.3)
     return ax, sax_1cm, sax_05cm, sax_5cm
 
 

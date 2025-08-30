@@ -1,5 +1,9 @@
 """Classes for handling panel layout in cm with upper left origin."""
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
 import matplotlib as mpl
 from matplotlib import figure
 from matplotlib.axes import Axes
@@ -8,7 +12,10 @@ from matplotlib.text import Text
 from . import base, locations, style
 from .grid import GuideGridClass
 
+from .types import BoundCM, ExtentCM, centimetres
 
+
+# TODO: make docs here the best
 class SciFigure(figure.Figure):
     """Figure object that handles panel layout in cm with upper left origin."""
 
@@ -19,7 +26,11 @@ class SciFigure(figure.Figure):
         *args: tuple,
         **kwargs: dict,
     ) -> None:
-        """Initialise the figure with a grid and cm overlay."""
+        """Initialise the figure with a grid and cm overlay.
+
+        Arguments and keyword arguments are fed into matplotlib's figure.Figure.
+        Please see https://matplotlib.org/stable/api/_as_gen/matplotlib.figure.Figure.html
+        """
         # must initialise before super because it'll call clear
         self.grid = GuideGridClass(self)
         super().__init__(*args, **kwargs)
@@ -44,19 +55,29 @@ class SciFigure(figure.Figure):
 
     def add_panel(
         self,
-        *args: tuple,
+        *args: BoundCM | tuple[float, float, float, float],
         **kwargs: dict,
-    ) -> "PanelAxes":
+    ) -> PanelAxes:
         """Add panel (axes) to the figure.
 
+        Creates a PanelAxes object positioned with cms
         args and kwargs are passed to PanelAxes.
         Required args is location (x1, y1, x2, y2) in cm from top left corner of figure.
-        fig.add_panel((1, .5, 5, 6.5))
 
+        Call signature ::
+
+            fig.add_panel((1, .5, 5, 6.5))
+
+        :param location: Location of the panel in cm (x0, y0, x1, y1). Can be:
+                        - Bound: (x, y, w, h)
+                        - Extent: (x0, y0, x1, y1)
+        :type location: BoundCM | ExtentCM | tuple[float, float, float, float]
         :return: The panel object
         :rtype: PanelAxes
         """
-        # TODO: should this be return self.fig.add_axes(rect, axes_class=PanelAxes))
+        # TODO: should this be return self.fig.add_axes(rect, axes_class=PanelAxes)
+        # add_axes(rect, projection=None, polar=False, **kwargs)
+        # add_axes(ax)
         # with rect being converted into cm?
         return PanelAxes(self, *args, **kwargs)
 
@@ -147,12 +168,12 @@ class PanelAxes(Axes):
     To use cm 'location' is used instead of 'position' e.g. set_location().
     """
 
-    panellabel: "PanelLabel"
+    panellabel: PanelLabel
 
     def __init__(
         self,
         fig: mpl.figure.Figure,
-        location: tuple,
+        location: BoundCM | ExtentCM,
         panellabel: str = None,
         method: str = "bbox",
         **kwargs,
@@ -188,6 +209,8 @@ class PanelAxes(Axes):
                 location[0] + location[2],
                 location[1] + location[3],
             )
+            # location = ExtentCM(*location)  # TODO: can't set attribute
+
         elif method == "bbox":
             pass
         else:
@@ -329,7 +352,14 @@ class FigureText:
 
     text: Text
 
-    def __init__(self, x: float, y: float, text: str, figure: mpl.figure.Figure, **kwargs) -> None:
+    def __init__(
+        self,
+        x: centimetre,
+        y: centimetre,
+        text: str,
+        figure: mpl.figure.Figure,
+        **kwargs: dict[str, Any],
+    ) -> None:
         """Create FigureText object."""
         x, y = locations.cm_to_fraction(figure, (x, y))
         self.text = figure.text(
@@ -341,7 +371,7 @@ class FigureText:
             **kwargs,
         )
 
-    def set_position(self, x: float, y: float) -> None:
+    def set_position(self, x: centimetres, y: centimetres) -> None:
         """Set position of figure text in cm."""
         x, y = locations.cm_to_fraction(self.text.get_figure(), (x, y))
         self.text.set_position((x, y))
