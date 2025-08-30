@@ -6,12 +6,12 @@ build-backend = "setuptools.build_meta"
 name = "scilayout"
 dynamic = ["version"]
 authors = [{name = "George Stuyt"}]
-description = "Create axes from top left of figure in centimetres to simplify scientific figure generation"
+description = "Create axes from top left of figure in centimetres to simplify scientific figure generation."
 dependencies = [
     "matplotlib",
     "numpy",
 ]
-readme = "README.rst"
+readme = "README.md"
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE"] 
 keywords = [
