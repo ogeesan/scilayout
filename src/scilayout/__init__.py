@@ -5,7 +5,7 @@ layout in centimeters and an upper-left origin. It includes classes for figures,
 text, and scalebars.
 """
 
-__version__ = "0.1.0b1"
+__version__ = "0.1.0b2"
 __all__ = ["__version__"]
 # Import dependencies
 import matplotlib.pyplot as plt
