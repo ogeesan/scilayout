@@ -17,9 +17,10 @@ def locationcm_to_position(fig, location_corners):
     """
     
     x0_cm, y0_cm, x1_cm, y1_cm = location_corners
-    assert x1_cm >= x0_cm, "x1 must be greater than x0"
-    assert y1_cm >= y0_cm, "y1 must be greater than y0"
-    
+    if x0_cm > x1_cm or y0_cm > y1_cm:
+        msg = "x0 must be less than x1 and y0 must be less than y1"
+        raise ValueError(msg)
+
     # Create the transform for centimeter-based positioning
     cm_transform = CMTransform(fig)
 
