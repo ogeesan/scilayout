@@ -263,7 +263,11 @@ class PanelAxes(Axes):
         super().clear()
         # check if panellabel is attr
         if "panellabel" in self.__dict__ and self.panellabel is not None:
-            self.panellabel.text.remove()
+            try:
+                self.panellabel.text.remove()
+            except NotImplementedError:
+                # Newer versions of matplotlib do something funky here.
+                pass
             self.panellabel = None
 
 
