@@ -56,6 +56,7 @@ ignore = [
 
 [dependency-groups]
 dev = [
+    "defusedxml>=0.7.1",
     "ipython>=8.12.3",
     "pyqt5==5.15.11", # windows compatibility
     "pyqt5-qt5==5.15.2", # windows compatibility
