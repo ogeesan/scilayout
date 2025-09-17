@@ -1,10 +1,14 @@
 """Grid overlay for matplotlib figures."""
 
+from typing import TYPE_CHECKING
+
 import numpy as np
+from matplotlib.axes import Axes
 
 from . import locations
-from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
+
     from .classes import SciFigure
 
 class GuideGridClass:
@@ -12,8 +16,13 @@ class GuideGridClass:
 
     Grid overlay assist in positioning the elements of a figure.
     Note that the design of this class is tightly coupled with the SciFigure class
-    (e.g. removal of axes and clear methods)
+    (e.g. removal of axes and clear methods).
+
     """
+
+    ax : Axes
+    """Axes tied to figure that has its lims sent to figure cm size."""
+    # lines : dict[str, dict[float, Line2D]] # TODO: this is broke
 
     def __init__(
         self,
@@ -24,14 +33,17 @@ class GuideGridClass:
     ) -> None:
         """Create a grid overlay for a figure.
 
-        :param figure: Figure to add the grid to
-        :type figure: matplotlib.figure.Figure or scilayout.classes.SciFigure
-        :param major_interval: Spacing of major grid, defaults to 5
-        :type major_interval: int or float, optional
-        :param minor_interval: Spacing of minor grid, defaults to 1
-        :type minor_interval: int or float, optional
-        :param half_spacer: Add half-spaced minor grid markers, defaults to True
-        :type half_spacer: bool, optional
+        Parameters
+        ----------
+        figure : matplotlib.figure.Figure | scilayout.classes.SciFigure
+            Figure to add the grid to
+        major_interval : int | float (optional)
+            Spacing of major grid, defaults to 5
+        minor_interval : int | float (optional)
+            Spacing of minor grid, defaults to 1
+        half_spacer : bool (optional)
+            Add half-spaced minor grid markers, defaults to True
+
         """
         self.figure = figure
         self.major_interval = major_interval
@@ -100,7 +112,7 @@ class GuideGridClass:
         ylocs = np.arange(0, height_cm + 1, self.major_interval)
         meshmajor = np.meshgrid(xlocs, ylocs)
         self.major_scatter = self.ax.scatter(
-            meshmajor[0], meshmajor[1], color="k", marker="+", lw=2, alpha=0.3
+            meshmajor[0], meshmajor[1], color="k", marker="+", lw=2, alpha=0.3,
         )
 
         # Draw user defines guidelines
@@ -121,10 +133,13 @@ class GuideGridClass:
 
         clear_lines() to remove all lines.
 
-        :param axis: Axis to add the line to, 'x' or 'y'
-        :type axis: str
-        :param location: Location of the line
-        :type location: float or int
+        Parameters
+        ----------
+        axis : str
+            Axis to add the line to, 'x' or 'y'.
+        location : float or int
+            Location of the line on axis.
+
         """
         if axis not in ["x", "y"]:
             msg = "Axis must be either 'x' or 'y'"
@@ -137,7 +152,7 @@ class GuideGridClass:
         self.lines = {"x": {}, "y": {}}
         self.redraw()
 
-    def detach_ax(self) -> None:
+    def _detach_ax(self) -> None:
         """Detach the grid from the axes."""
         if self.ax:
             self.ax.clear()
@@ -149,7 +164,7 @@ class GuideGridClass:
             self.major_scatter.remove()
         if self.half_scatter:
             self.half_scatter.remove()
-        self.detach_ax()
+        self._detach_ax()
 
     def hide(self) -> None:
         """Hide the grid."""
