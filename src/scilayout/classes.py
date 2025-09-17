@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import matplotlib as mpl
 from matplotlib import figure
@@ -11,22 +11,29 @@ from matplotlib.text import Text
 
 from . import base, locations, style
 from .grid import GuideGridClass
-
 from .types import BoundCM, ExtentCM, centimetres
 
 
 # TODO: make docs here the best
 class SciFigure(figure.Figure):
-    """Figure object that handles panel layout in cm with upper left origin."""
+    """Figure object that handles panel layout in cm with upper left origin.
+
+    Methods
+    -------
+    draw_grid()
+        Add a centimetre grid overlay onto the figure.
+
+    """
 
     grid: GuideGridClass
+    """Handler for guide grid."""
 
     def __init__(
         self,
         *args: tuple,
         **kwargs: dict,
     ) -> None:
-        """Initialise the figure with a grid and cm overlay.
+        """Initialise a figure with extra scientific-figure ready features.
 
         Arguments and keyword arguments are fed into matplotlib's figure.Figure.
         Please see https://matplotlib.org/stable/api/_as_gen/matplotlib.figure.Figure.html
@@ -40,10 +47,13 @@ class SciFigure(figure.Figure):
     def set_size_cm(self, w: float, h: float) -> None:
         """Set size of figure in cm.
 
-        :param w: width
-        :type w: float
-        :param h: height
-        :type h: float
+        Parameters
+        ----------
+        w : float
+            Width (cm) of figure.
+        h : float
+            Height (cm) of figure.
+
         """
         base.set_figure_size_cm(self, w, h)
         # TODO: resize panels to preserve their position
@@ -55,7 +65,9 @@ class SciFigure(figure.Figure):
 
     def add_panel(
         self,
-        *args: BoundCM | tuple[float, float, float, float],
+        location: BoundCM | ExtentCM,
+        panellabel: str = None,
+        method: str = "bbox",
         **kwargs: dict,
     ) -> PanelAxes:
         """Add panel (axes) to the figure.
@@ -66,20 +78,37 @@ class SciFigure(figure.Figure):
 
         Call signature ::
 
-            fig.add_panel((1, .5, 5, 6.5))
+            fig.add_panel((1, .5, 5, 6.5), method="size")
 
-        :param location: Location of the panel in cm (x0, y0, x1, y1). Can be:
-                        - Bound: (x, y, w, h)
-                        - Extent: (x0, y0, x1, y1)
-        :type location: BoundCM | ExtentCM | tuple[float, float, float, float]
-        :return: The panel object
-        :rtype: PanelAxes
+
+        Parameters
+        ----------
+        location : BoundCM | ExtentCM | tuple[float, float, float, float]
+            Location of the panel in cm (x0, y0, x1, y1). Can be:
+            - Bound: (x, y, w, h)
+            - Extent: (x0, y0, x1, y1)
+        panellabel : str | None
+            Letter to initialise the panel with.
+        method : str
+            How to interpret the coordinates of the location.
+            "bbox" (default) interprets x2 and y2 as coordinates.
+            "size" interprets x2 and y2 as width and height.
+        kwargs : dict
+            Key word arguments to pass to PanelAxes initialisation.
+
+        Returns
+        -------
+        PanelAxes
+            The panel object
+
         """
         # TODO: should this be return self.fig.add_axes(rect, axes_class=PanelAxes)
         # add_axes(rect, projection=None, polar=False, **kwargs)
         # add_axes(ax)
-        # with rect being converted into cm?
-        return PanelAxes(self, *args, **kwargs)
+        # with rect being converted into bm?
+        return PanelAxes(
+            self, location=location, panellabel=panellabel, method=method, **kwargs,
+        )
 
     def draw_grid(
         self,
@@ -102,11 +131,11 @@ class SciFigure(figure.Figure):
         self,
         **kwargs: dict,
     ) -> None:
-        """Clear the figure and handle special status for cm_overlay."""
+        """Clear the figure (including removal of grid)."""
         super().clear(**kwargs)
         self.cm_overlay = None
         if self.grid:
-            self.grid.detach_ax()
+            self.grid._detach_ax()
 
     def clf(
         self,
@@ -151,9 +180,13 @@ class SciFigure(figure.Figure):
     def export(self, savepath: str, **kwargs) -> None:
         """Export the figure to a file.
 
-        :param savepath: The path to save the figure to
-        :type savepath: str or Path
-        :param kwargs: Additional arguments to pass to savefigure
+        Parameters
+        ----------
+        savepath : str | Path
+            The path to save the figure to
+        kwargs : dict
+            Additional arguments to pass to savefigure
+
         """
         base.savefigure(self, savepath, **kwargs)
 
@@ -196,10 +229,10 @@ class PanelAxes(Axes):
 
         If method is 'size' then location is (x, y, width, height)
 
-        :param location: Coordinates from top left corner in cm
-        :type location: Tuple[float, float, float, float]
-        :param method: coordinate system of 'bbox' or 'size', default 'bbox'
-        :type method: str
+        location : ExtentCM | BoundCM | Tuple[float, float, float, float]
+            Coordinates from top left corner in cm
+        method : str
+            Coordinate system of 'bbox' or 'size', default 'bbox'
         """
         assert len(location) == 4, "Location must be of length 4"
         if method == "size":
@@ -242,12 +275,15 @@ class PanelAxes(Axes):
         label: str,
         ha: str = None,
     ) -> None:
-        """Add a label to the panel.
+        """Add a label to the panel, or set its value.
 
-        :param label: Identifier string for the panel e.g. 'a'
-        :type label: str
-        :param ha: Horizontal alignment, defaults to None
-        :type ha: str, optional
+        Parameters
+        ----------
+        label : str
+            Identifier string for the panel e.g. 'a'
+        ha : str (optional)
+            Horizontal alignment, defaults to None
+
         """
         # TODO: allow for more complexity at inisitalisation (especially x/y offsets, positions)
         if self.panellabel is not None:
@@ -286,9 +322,12 @@ class PanelLabel:
     """
 
     ax: PanelAxes
-    xoffset: float  # cm from top left corner
-    yoffset: float  # cm from top left corner
-    text: Text  # The actual text object
+    xoffset: float
+    """cm from top left corner"""
+    yoffset: float
+    """cm from top left corner"""
+    text: Text
+    """The actual text object"""
 
     def __init__(self, ax: PanelAxes, label: str) -> None:
         """Create text item to identify the panel."""
@@ -303,7 +342,7 @@ class PanelLabel:
         """Top left location of the panel."""
         return self.ax.get_location()[0:2]
 
-    def get_location(self) -> tuple:
+    def get_location(self) -> tuple[centimetres, centimetres]:
         """Get position on figure in cm."""
         figfrac = self.text.get_position()
         return locations.fraction_to_cm(self.ax.get_figure(), figfrac)
@@ -321,10 +360,15 @@ class PanelLabel:
     def set_offset(self, x: float = None, y: float = None) -> None:
         """Set position of label relative to the upper left corner of the axes.
 
-        :param x:
-        :type x: float
-        :param y:
-        :type y: float
+        Parameters
+        ----------
+        x : float
+            Distance (cm) from location to horizontally offset label.
+            Negative values move label left.
+        y : float
+            Distance (cm) from location to vertically offset label.
+            Negative values move label upwards.
+
         """
         # x_cm, y_cm = fraction_to_cm(self.ax.get_figure(), self.text.get_location())
         true_x, true_y = self.anchorlocation[0], self.anchorlocation[1]
@@ -341,10 +385,14 @@ class PanelLabel:
 
         For more info on alignment options see:
         https://matplotlib.org/stable/gallery/text_labels_and_annotations/text_alignment.html
-        :param h: horizontal alignment
-        :type h: str
-        :param v: vertical alignment
-        :type v: str
+
+        Parameters
+        ----------
+        h : str
+            Text horizontal alignment
+        v : str
+            Text vertical alignment
+
         """
         # todo: change this behaviour?
         if h == "right":
@@ -355,11 +403,12 @@ class FigureText:
     """A text object that is positioned relative to the figure."""
 
     text: Text
+    """Text object."""
 
     def __init__(
         self,
-        x: centimetre,
-        y: centimetre,
+        x: centimetres,
+        y: centimetres,
         text: str,
         figure: mpl.figure.Figure,
         **kwargs: dict[str, Any],
