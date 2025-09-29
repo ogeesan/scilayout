@@ -58,6 +58,7 @@ ignore = [
 dev = [
     "defusedxml>=0.7.1",
     "ipython>=8.12.3",
+    "mkdocs-material>=9.6.20",
     "pyqt5==5.15.11",          # windows compatibility
     "pyqt5-qt5==5.15.2",       # windows compatibility
 ]
