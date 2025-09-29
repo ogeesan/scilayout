@@ -1,0 +1,51 @@
+site_name: scilayout
+site_url: https://ogeesan.github.io/scilayout
+repo_url: https://github.com/ogeesan/scilayout
+repo_name: ogeesan/scilayout
+theme:
+  name: material
+  icon:
+    logo: material/drawing-box
+  font:
+    text: Atkinson Hyperlegible
+    code: Cousine
+  palette:
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+      primary: green
+      accent: pink
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+      primary: green
+      accent: pink
+  features:
+    - content.code.copy # allow codeblock copying
+    - content.code.annotate
+
+markdown_extensions:
+  # Admonitions (callout boxes)
+  - admonition
+  # Annotations
+  - attr_list
+  - md_in_html
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  # Code blocks
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
