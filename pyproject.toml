@@ -5,21 +5,20 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "scilayout"
 dynamic = ["version"]
-authors = [{name = "George Stuyt"}]
+authors = [{ name = "George Stuyt" }]
 description = "Create axes from top left of figure in centimetres to simplify scientific figure generation."
-dependencies = [
-    "matplotlib",
-    "numpy",
-]
+dependencies = ["matplotlib", "numpy"]
+requires-python = ">=3.9"
 readme = "README.md"
 license = "GPL-3.0-or-later"
-license-files = ["LICENSE"] 
+license-files = ["LICENSE"]
 keywords = [
     "matplotlib-figures",
     "scientific-papers",
     "thesis-template",
     "matplotlib-styles",
-    "python"]
+    "python",
+]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Framework :: Matplotlib",
@@ -28,7 +27,8 @@ classifiers = [
     "Topic :: Artistic Software",
     "Topic :: Multimedia :: Graphics :: Presentation",
     "Topic :: Multimedia :: Graphics :: Editors :: Vector-Based",
-    "Topic :: Scientific/Engineering :: Visualization"]
+    "Topic :: Scientific/Engineering :: Visualization",
+]
 
 [project.urls]
 Repository = "https://github.com/ogeesan/scilayout.git"
@@ -41,23 +41,23 @@ include = ["scilayout"]
 exclude = ["tests*"]
 
 [tool.setuptools.dynamic]
-version = {attr = "scilayout.__version__"}
+version = { attr = "scilayout.__version__" }
 
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
-    "FBT001", # positional boolean kwarg
-    "FBT002", # positional boolean kwarg
+    "FBT001",  # positional boolean kwarg
+    "FBT002",  # positional boolean kwarg
     "PLR0913", # too many arguments for a function
-    "TD", # the formats of todos
-    "RUF013", # implicit optional
-    "UP025", # deprecation warning for importing Tuple from typing
-    ]
+    "TD",      # the formats of todos
+    "RUF013",  # implicit optional
+    "UP025",   # deprecation warning for importing Tuple from typing
+]
 
 [dependency-groups]
 dev = [
     "defusedxml>=0.7.1",
     "ipython>=8.12.3",
-    "pyqt5==5.15.11", # windows compatibility
-    "pyqt5-qt5==5.15.2", # windows compatibility
+    "pyqt5==5.15.11",          # windows compatibility
+    "pyqt5-qt5==5.15.2",       # windows compatibility
 ]
