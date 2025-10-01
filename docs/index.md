@@ -26,9 +26,13 @@ The idea is to make and interact with Matplotlib axes in centimetres from the to
 ## Why use this?
 
 1. Powerful figure design: there are practically no limits when it comes to building figures with Matplotlib
-2. Universal skills: rather than learning proprietary software you can learn flexible and transferable Python and Matplotlib skills.
-3. Text based source: version control, portability, and fiddling are as easy as managing text files.
-6. Vector graphics: make use of Matplotlib's renderer to gain huge flexibility of quality output.
+2. Universal skills: rather than learning proprietary software you can utilise flexible and transferable Python and Matplotlib skills.
+3. Text based source: version control, portability, and visual fiddling are as easy as managing text files.
+4. Vector graphics: make use of Matplotlib's renderer to gain huge flexibility of quality output.
+
+A classic problem is choosing colours for all of the elements in your figures.
+Can't decide?
+Just leave that problem until later: create a function that selects the colour based on experimented group and you can modify that function later.
 
 ## Getting started
 ### Installation
@@ -46,9 +50,10 @@ To make full use of Scilayout, there are two things a user should know about.
 
 
 #### Matplotlib's object-oriented interface
-Scilayout is built to work with the object-oriented component of matplotlib. If this means nothing to you, or you exclusively use `plt.plot`, then it's worth thinking about using with Matplotlib's `Axes` objects directly.
+Scilayout is built to work with the object-oriented component of matplotlib.
+If this means nothing to you, or you exclusively use `plt.plot`, then it's worth thinking about using with Matplotlib's `Axes` objects directly.
 
-You are ready to use scilayout when you are able to write a function that takes an existing `matplotlib.Axes` object as one of its arguments, and the function draws the plot
+You are ready to use scilayout when you are able to write a function that takes an existing `matplotlib.Axes` object as one of its arguments, and the function draws the plot:
 
 ```python
 def mydataplot(ax, data):
@@ -59,8 +64,8 @@ def mydataplot(ax, data):
 ```
 
 ### Downsides to using Python to make your figures
-Vector graphhic formats are not perfectly standardised, and so sometimes there are odd rendering issues if you export from Python but read using Inkscape/Illustrator.
-A guide on potential pitfalls are forthcoming.
+Vector graphic formats are not perfectly standardised, and so sometimes there are odd rendering issues if you export from Python but read using Inkscape/Illustrator.
+A guide on potential pitfalls is forthcoming.
 
 Collaboration using .pdf figures can be painful.
 If only one user is using Python to make the figures but their collaborators are not, then the Python user would have to replicate their changes in code.
