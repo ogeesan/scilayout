@@ -70,4 +70,5 @@ dev = [
     "pyqt5==5.15.11",          # windows compatibility
     "pyqt5-qt5==5.15.2",       # windows compatibility
     "pytest>=8.4.2",
+    "pytest-cov>=7.0.0",
 ]
