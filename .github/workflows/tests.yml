@@ -1,25 +1,44 @@
-name: Test pull request!
-
-on: pull_request
-
+name: Tests
+on:
+  push:
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
 
 jobs:
   test:
-    name: Run unit tests
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.x'
-    - name: Install dependencies
-      # run: python -m pip install --upgrade pip setuptools matplotlib numpy
-      run: pip install -e .
-    # - name: Add utilites to path
-    #   shell: bash
-    #   run: echo 'tests\' >> $GITHUB_PATH
-    - name: Test with pytest
-      run: |
-        pip install pytest defusedxml
-        pytest tests/
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+
+      # Use a cache to rapidly access known uv lockfiles.
+      - name: Cache uv dependencies
+        uses: actions/cache@v3
+        with:
+            path: |
+                ~/.cache/uv
+                .venv
+            key: ${{ runner.os }}-uv-${{ hashFiles('uv.lock') }}
+            restore-keys: |
+                ${{ runner.os }}-uv-
+
+      # Use Python version that is the primary support version.
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Run tests with coverage
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+            uv sync --locked --all-extras
+            uv run python -m pytest --cov --cov-report=xml
+
+      - name: Upload coverage to Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          file: coverage.xml
+          parallel: false
