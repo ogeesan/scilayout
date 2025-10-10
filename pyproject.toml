@@ -46,6 +46,7 @@ version = { attr = "scilayout.__version__" }
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
+    "EXE",     # executable rules
     "FBT001",  # positional boolean kwarg
     "FBT002",  # positional boolean kwarg
     "PLR0913", # too many arguments for a function
@@ -54,6 +55,9 @@ ignore = [
     "UP025",   # deprecation warning for importing Tuple from typing
 ]
 
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D", "ANN201"]
+
 [dependency-groups]
 dev = [
     "defusedxml>=0.7.1",
@@ -61,4 +65,5 @@ dev = [
     "mkdocs-material>=9.6.20",
     "pyqt5==5.15.11",          # windows compatibility
     "pyqt5-qt5==5.15.2",       # windows compatibility
+    "pytest>=8.4.2",
 ]
