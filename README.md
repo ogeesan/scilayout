@@ -1,3 +1,5 @@
+![Pepy Total Downloads](https://img.shields.io/pepy/dt/scilayout) [![Coverage Status](https://coveralls.io/repos/github/ogeesan/scilayout/badge.svg?branch=main)](https://coveralls.io/github/ogeesan/scilayout?branch=main)
+
 # What is `scilayout`?
 
 > [!WARNING]  
