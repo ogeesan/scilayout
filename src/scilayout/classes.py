@@ -65,7 +65,9 @@ class SciFigure(figure.Figure):
 
     def add_panel(
         self,
-        location: BoundCM | ExtentCM,
+        location: BoundCM
+        | ExtentCM
+        | tuple[centimetres, centimetres, centimetres, centimetres],
         panellabel: str = None,
         method: str = "bbox",
         **kwargs: dict,
@@ -107,7 +109,11 @@ class SciFigure(figure.Figure):
         # add_axes(ax)
         # with rect being converted into bm?
         return PanelAxes(
-            self, location=location, panellabel=panellabel, method=method, **kwargs,
+            self,
+            location=location,
+            panellabel=panellabel,
+            method=method,
+            **kwargs,
         )
 
     def draw_grid(
@@ -139,7 +145,7 @@ class SciFigure(figure.Figure):
 
     def clf(
         self,
-        **kwargs,
+        **kwargs: dict,
     ) -> None:
         """Clear the figure entirely."""
         super().clf(**kwargs)
@@ -177,7 +183,7 @@ class SciFigure(figure.Figure):
             msg = f"Backend {backend} not implemented. Submit issue to add suport."
             raise NotImplementedError(msg)
 
-    def export(self, savepath: str, **kwargs) -> None:
+    def export(self, savepath: str, **kwargs: dict) -> None:
         """Export the figure to a file.
 
         Parameters
