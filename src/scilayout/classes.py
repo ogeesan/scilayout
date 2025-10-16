@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 import matplotlib as mpl
@@ -183,7 +184,7 @@ class SciFigure(figure.Figure):
             msg = f"Backend {backend} not implemented. Submit issue to add suport."
             raise NotImplementedError(msg)
 
-    def export(self, savepath: str, **kwargs: dict) -> None:
+    def export(self, savepath: Path | str, **kwargs: dict) -> None:
         """Export the figure to a file.
 
         Parameters

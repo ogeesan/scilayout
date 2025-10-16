@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from . import locations, style
-from .types import centimetres, inches
 
 
 def create_panel_label(
@@ -16,12 +15,18 @@ def create_panel_label(
 ) -> mpl.text.Text:
     """Add a panel label in figure fraction coordinates.
 
-    :param ax: Axes object to attach the label to
-    :type ax: matplotlib.axes.Axes
-    :param text: The text to add to a panel
-    :type text: str
-    :return: An axes text object
-    :rtype: matplotlib.text.Text
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        Axes object to attach the label to
+    text : str
+        The text to add to a panel
+
+    Returns
+    -------
+    matplotlib.text.Text
+        An axes text object
+
     """
     # Get the position of axes top left corner in figure coordinates
     bbox = ax.get_position().bounds
@@ -111,16 +116,21 @@ def savefigure(
 
     The default 'tight' bounding box will crop the whitespace around the figure.
 
-    :param fig: Figure to save
-    :type fig: matplotlib.figures.Figure
-    :param fpath: Path to save the figure to
-    :type fpath: pathlib.Path or str
-    :param dpi: Dots per inch, default 300
-    :type dpi: float or int
-    :param transparent_png: Make png output transparent
-    :type transparent_png: bool
-    :param bbox: Bounding box to use for pdf and eps output, default 'tight'
-    :type bbox: str
+    Parameters
+    ----------
+    fig : matplotlib.figures.Figure
+        Figure to save
+    fpath : pathlib.Path or str
+        Path to save the figure to
+    dpi : float or int
+        Dots per inch, default 300
+    transparent_png : bool
+        Make png output transparent, default True
+    bbox : str
+        Bounding box to use for pdf and eps output, default 'tight'
+    allow_overwrite : bool, optional
+        Allow overwriting of an existing file at fpath, default True.
+
     """
     if not isinstance(fpath, Path):
         fpath = Path(fpath)
@@ -177,17 +187,20 @@ def add_cm_overlay_grid(
 ]:
     """Add an overlay to view the cm size of all items on the figure.
 
-    :param figure: figure to overlay a grid onto
-    :type figure: matplotlib.figures.Figure
-    :param width_cm: Width of the figure in cm (default None, uses figure size)
-    :type width_cm: float
-    :param height_cm: Height of the figure in cm (default None, uses figure size)
-    :type height_cm: float
-    :return: Tuple containing the axes and scatter collections for 1cm, 0.5cm, and 5cm markers
-    :rtype: tuple[mpl.axes.Axes,
-                  mpl.collections.PathCollection,
-                  mpl.collections.PathCollection,
-                  mpl.collections.PathCollection]
+    Parameters
+    ----------
+    figure : matplotlib.figures.Figure
+        Figure to overlay a grid onto
+    width_cm : float
+        Width of the figure in cm (default None, uses figure size)
+    height_cm : float
+        Height of the figure in cm (default None, uses figure size)
+
+    Returns
+    -------
+    tuple[mpl.axes.Axes, mpl.collections.PathCollection, mpl.collections.PathCollection, mpl.collections.PathCollection]
+    Tuple containing the axes and scatter collections for 1cm, 0.5cm, and 5cm markers
+
     """
     # Allow user to specify what the position is meant to be
     # rather than what it actually is
@@ -223,7 +236,13 @@ def add_cm_overlay_grid(
 
     # Plot 0.5cm markers
     sax_05cm = ax.scatter(
-        mesh[0] + 0.5, mesh[1] + 0.5, marker="x", color="k", alpha=0.3, s=5, lw=0.3
+        mesh[0] + 0.5,
+        mesh[1] + 0.5,
+        marker="x",
+        color="k",
+        alpha=0.3,
+        s=5,
+        lw=0.3,
     )
 
     # Create 5cm mesh grid
@@ -239,11 +258,14 @@ def set_figure_size_cm(
 ) -> None:
     """Set the size of a figure in cm.
 
-    :param fig: Figure to change
-    :type fig: matplotlib.figures.Figure
-    :param w: Width in cm
-    :type w: float
-    :param h: Height in cm
-    :type h: float
+    Parameters
+    ----------
+    fig : matplotlib.figures.Figure
+        Figure to change
+    w : float
+        Width in cm
+    h : float
+        Height in cm
+
     """
     fig.set_size_inches(w=locations.cm_to_inch(w), h=locations.cm_to_inch(h))
