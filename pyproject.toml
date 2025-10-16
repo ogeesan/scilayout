@@ -53,6 +53,9 @@ ignore = [
     "TD",      # the formats of todos
     "RUF013",  # implicit optional
     "UP025",   # deprecation warning for importing Tuple from typing
+    "SLF001",  # Accessing private method
+    "SIM105",  # use contextlib instead of try/except
+    "FIX002",  # line contains TODO
 ]
 
 [tool.ruff.lint.per-file-ignores]
