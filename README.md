@@ -1,4 +1,5 @@
 ![Pepy Total Downloads](https://img.shields.io/pepy/dt/scilayout) [![Coverage Status](https://coveralls.io/repos/github/ogeesan/scilayout/badge.svg?branch=main)](https://coveralls.io/github/ogeesan/scilayout?branch=main)
+[![EffVer Versioning](https://img.shields.io/badge/version_scheme-EffVer-0097a7)](https://jacobtomlinson.dev/effver)
 
 # What is `scilayout`?
 
@@ -30,5 +31,7 @@ This package is designed for people with:
 - A basic understanding of `matplotlib`'s `Axes` object and how to work with it (rather than only using `plt`, the differences described [here](https://matplotlib.org/matplotblog/posts/pyplot-vs-object-oriented-interface/))
 - A desire to produce figures entirely in code (example approaches described in blogposts from [brushingupscience.com](https://brushingupscience.com/2021/11/02/a-better-way-to-code-up-scientific-figures/#more-6299) and [dendwrite.substack](https://dendwrite.substack.com/p/a-complete-ish-guide-to-making-scientific))
 
-Detailed documentation is under construction.
-<!-- For more documentation, please see https://scilayout.readthedocs.io -->
+<!-- show documentation site at ogeesan.github.io/scilayout centered and heading size -->
+<div align="center">
+  <h2><a href="https://ogeesan.github.io/scilayout">Documentation Site (github.io/scilayout)</a></h2>
+</div>
