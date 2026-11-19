@@ -44,25 +44,32 @@ exclude = ["tests*"]
 version = { attr = "scilayout.__version__" }
 
 [tool.ruff.lint]
-select = ["ALL"]
-ignore = [
-    "EXE",     # executable rules
-    "FBT001",  # positional boolean kwarg
-    "FBT002",  # positional boolean kwarg
-    "PLR0913", # too many arguments for a function
-    "TD",      # the formats of todos
-    "RUF013",  # implicit optional
-    "UP025",   # deprecation warning for importing Tuple from typing
-    "SLF001",  # Accessing private method
-    "SIM105",  # use contextlib instead of try/except
-    "FIX002",  # line contains TODO
+select = [
+    "E", "W",  # pycodestyle
+    "F",       # pyflakes
+    "I",       # import sorting
+    "UP",      # pyupgrade
+    "B",       # bugbear
+    "C4",      # comprehensions
+    "SIM",     # simplifications
+    "RUF",     # ruff-specific
+    "NPY",     # numpy
+    "D",       # docstrings
+    "ANN",     # type annotations
 ]
+ignore = [
+    "D203",    # conflicts with D211
+    "D213",    # conflicts with D212
+    "RUF013",  # implicit optional
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = [
     "D",    # docstring
     "ANN",  # type annotations
-    "S101", # assert
 ]
 
 [dependency-groups]
