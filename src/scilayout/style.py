@@ -1,6 +1,5 @@
 """Define the parameters for the layout of scientific plots.
 
-
 ```scilayout.params['panellabel.font'] = 'sans-serif'```
 
 
@@ -35,21 +34,21 @@ defaultstyles = {
 
 
 class StyleDictionary(dict):
-    """A dictionary that allows access to keys as attributes"""
+    """A dictionary that allows access to keys as attributes."""
 
     # This is like matplotlib.rcParams but not so complicated (and validated) that it does your head in
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(defaultstyles.copy())
 
-    def __setitem__(self, name, value):
+    def __setitem__(self, name, value) -> None:
         # Validate the key
         if name not in self.keys():
             raise ValueError(f"Invalid key: {name}. Can only set existing keys.")
         super().__setitem__(name, value)
 
-    def _setitem_bypass(self, name, value):
-        """Bypass the validation for setting the dictionary directly"""
+    def _setitem_bypass(self, name, value) -> None:
+        """Bypass the validation for setting the dictionary directly."""
         super().__setitem__(name, value)
 
     def __getattr__(self, key):
@@ -66,17 +65,17 @@ def _load_config(filepath):
     :param filepath: Path to the json configuration file
     :type filepath: str
     :return: Dictionary of parameters
-    :rtype: dict
+    :rtype: dict.
     """
     # Why JSON and not the same format as matplotlib? Because their implementation is too complicated to replicate here.
     # Fight me.
-    with open(filepath, "r") as f:
+    with open(filepath) as f:
         config = json.load(f)
     return config
 
 
-def use(filepath, params=params, allow_only_valid_keys=True):
-    """Use a configuration file to set parameters
+def use(filepath, params=params, allow_only_valid_keys=True) -> None:
+    """Use a configuration file to set parameters.
 
     :param filepath: Path to the configuration file
     :type filepath: str
@@ -107,7 +106,7 @@ def use(filepath, params=params, allow_only_valid_keys=True):
             params[key] = config[key]
 
 
-def reset():
-    """Reset the parameters to the default values"""
-    for key in params.keys():
+def reset() -> None:
+    """Reset the parameters to the default values."""
+    for key in params:
         params[key] = defaultstyles[key]

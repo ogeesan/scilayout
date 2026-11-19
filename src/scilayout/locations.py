@@ -6,7 +6,7 @@ import matplotlib.figure
 import numpy as np
 from matplotlib.transforms import Transform
 
-from .types import BoundCM, ExtentCM, ExtentInches, centimetres, inches
+from .types import ExtentCM, ExtentInches, centimetres, inches
 
 
 def locationcm_to_position(
@@ -91,7 +91,8 @@ def fraction_to_cm(fig, xy) -> tuple[centimetres, centimetres]:
 # --- Classes ---
 class CMTransform(Transform):
     """A transformation class to convert coordinates from centimeters to figure
-    fractions in a Matplotlib figure."""
+    fractions in a Matplotlib figure.
+    """
 
     input_dims = 2
     output_dims = 2
@@ -121,7 +122,7 @@ class InvertedCMTransform(Transform):
     output_dims = 2
     has_inverse = True
 
-    def __init__(self, fig, *args, **kwargs):
+    def __init__(self, fig, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.fig = fig
 

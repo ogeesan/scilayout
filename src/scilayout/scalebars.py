@@ -25,8 +25,8 @@ class ScaleBar:
         textstring=None,
         lw=None,
         fontsize=None,
-    ):
-        """Create a scalebar on a matplotlib axes
+    ) -> None:
+        """Create a scalebar on a matplotlib axes.
 
         :param ax: Axes to draw the scalebar on
         :type ax: matplotlib.axes.Axes
@@ -94,8 +94,8 @@ class ScaleBar:
 
         self._initialise_scalebar(*xy)
 
-    def _initialise_scalebar(self, x, y):
-        """Initialise the scalebar and text objects"""
+    def _initialise_scalebar(self, x, y) -> None:
+        """Initialise the scalebar and text objects."""
         if self.orientation == "h":
             if self.vpos == "top":
                 va = "bottom"
@@ -103,7 +103,7 @@ class ScaleBar:
                 va = "top"
             else:
                 va = "center"
-            text_kwargs = dict(ha=self.hpos, va=va)
+            text_kwargs = {"ha": self.hpos, "va": va}
         else:
             if self.hpos == "left":
                 ha = "right"
@@ -111,7 +111,7 @@ class ScaleBar:
                 ha = "left"
             else:
                 ha = "center"
-            text_kwargs = dict(rotation=90, ha=ha, va=self.vpos)
+            text_kwargs = {"rotation": 90, "ha": ha, "va": self.vpos}
 
         text_xpos, text_ypos = 0, 0
         x_locs, y_locs = [0, 1], [0, 1]
@@ -139,8 +139,8 @@ class ScaleBar:
         )
         self.move(x, y)
 
-    def move(self, x, y, coordSystem=None):
-        """Move the scalebar to a new position
+    def move(self, x, y, coordSystem=None) -> None:
+        """Move the scalebar to a new position.
 
         :param x: x-coordinate of the new position
         :type x: float
@@ -170,7 +170,7 @@ class ScaleBar:
         )
 
         # Find line bbox
-        line_bbox = self.line.get_window_extent(renderer)
+        self.line.get_window_extent(renderer)
         # TODO: make the line width change the padding
 
         # Convert text width to data coordinates
@@ -207,7 +207,7 @@ class ScaleBar:
         self.ax.figure.canvas.draw()  # to update the display of the modified objects
 
     def _find_x_y(self, x, y, coordSystem):
-        """Find the x and y coordinates of the scalebar
+        """Find the x and y coordinates of the scalebar.
 
         :param x: x-coordinate of the new position
         :type x: float
@@ -245,8 +245,8 @@ class ScaleBar:
             y_locs = [y, y + self.length]
         return x_locs, y_locs
 
-    def _update_appearance(self):
-        """Update the appearance of the scalebar"""
+    def _update_appearance(self) -> None:
+        """Update the appearance of the scalebar."""
         self.text.set_size(self.fontsize)
         self.line.set_linewidth(self.lw)
         self.ax.figure.canvas.draw()
@@ -268,7 +268,7 @@ class LinkedScaleBar:
         x_textstring=None,
         y_textstring=None,
         lw=None,
-    ):
+    ) -> None:
         if vat is None:
             vat = "bottom"
         self.x_scalebar = ScaleBar(
@@ -297,6 +297,6 @@ class LinkedScaleBar:
         )
         self.ax = ax
 
-    def move(self, x, y, coordSystem=None):
+    def move(self, x, y, coordSystem=None) -> None:
         self.x_scalebar.move(x, y, coordSystem)
         self.y_scalebar.move(x, y, coordSystem)

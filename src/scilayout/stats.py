@@ -4,7 +4,7 @@ from matplotlib import transforms
 
 
 class StatsLine:
-    def __init__(self, ax, y, x0, x1):
+    def __init__(self, ax, y, x0, x1) -> None:
         """Horizontal statistical line with vertical line at the end.
 
         :param ax: Axes to draw the line
@@ -44,13 +44,13 @@ class StatsLine:
 
         # TODO: implement style support here
         # turn off clip
-        stylekwargs = dict(
-            color=self.color,
-            linewidth=self.linewidth,
-            transform=self.transform,
-            clip_on=False,
-            label="_nolegend_",
-        )
+        stylekwargs = {
+            "color": self.color,
+            "linewidth": self.linewidth,
+            "transform": self.transform,
+            "clip_on": False,
+            "label": "_nolegend_",
+        }
 
         self.main_bar = self.ax.plot(
             [self.x0, self.x1], [self.y, self.y], **stylekwargs
@@ -66,8 +66,8 @@ class StatsLine:
         self.ax.set_xlim(xlim)
         self.ax.set_ylim(ylim)
 
-    def set_transform(self, x="data", y="axes"):
-        """Set the transform for the stat bar
+    def set_transform(self, x="data", y="axes") -> None:
+        """Set the transform for the stat bar.
 
         Transform type can be 'data' or 'axes'.
         - 'data' will set the transform to the data coordinates of the axis.
@@ -78,7 +78,7 @@ class StatsLine:
         :param y: y transform type
         :type y: str
         """
-        transform = dict(x=None, y=None)
+        transform = {"x": None, "y": None}
         for key, val in zip(["x", "y"], [x, y]):
             if val == "data":
                 transform[key] = self.ax.transData
