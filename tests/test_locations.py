@@ -1,3 +1,5 @@
+from collections.abc import Generator
+
 import pytest
 from matplotlib.figure import Figure
 from matplotlib.pyplot import close
@@ -8,7 +10,7 @@ places = 7
 
 
 @pytest.fixture
-def fig() -> Figure:
+def fig() -> Generator[Figure, None, None]:
     fig_object = Figure(figsize=(6, 4))
     yield fig_object
     close(fig_object)
@@ -24,7 +26,7 @@ class TestLocationToPosition:
             0.09842519685039364,
         )
         result = locationcm_to_position(fig, location)
-        for res, exp in zip(result, expected_result):
+        for res, exp in zip(result, expected_result, strict=True):
             assert res == pytest.approx(exp)
 
     def test_location_to_position_negative_values(self, fig):
@@ -36,14 +38,14 @@ class TestLocationToPosition:
             0.19685039370078727,
         )
         result = locationcm_to_position(fig, location)
-        for res, exp in zip(result, expected_result):
+        for res, exp in zip(result, expected_result, strict=True):
             assert res == pytest.approx(exp)
 
     def test_location_to_position_zero_values(self, fig):
         location = (0, 0, 0, 0)
         expected_result = (0.0, 1.0, 0.0, 0.0)
         result = locationcm_to_position(fig, location)
-        for res, exp in zip(result, expected_result):
+        for res, exp in zip(result, expected_result, strict=True):
             assert res == pytest.approx(exp)
 
     def test_location_to_position_different_values(self, fig):
@@ -55,5 +57,5 @@ class TestLocationToPosition:
             0.295275590551181,
         )
         result = locationcm_to_position(fig, location)
-        for res, exp in zip(result, expected_result):
+        for res, exp in zip(result, expected_result, strict=True):
             assert res == pytest.approx(exp)

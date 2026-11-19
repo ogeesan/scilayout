@@ -1,3 +1,5 @@
+from collections.abc import Generator
+
 import pytest
 from matplotlib.pyplot import close
 
@@ -5,7 +7,7 @@ import scilayout
 
 
 @pytest.fixture
-def ax() -> scilayout.classes.PanelAxes:
+def ax() -> Generator[scilayout.classes.PanelAxes, None, None]:
     fig = scilayout.figure()
     testax = fig.add_panel((1, 2, 5, 5), method="size")
     yield testax
@@ -15,6 +17,7 @@ def ax() -> scilayout.classes.PanelAxes:
 @pytest.fixture
 def panellabel(ax: scilayout.classes.PanelAxes) -> scilayout.classes.PanelLabel:
     ax.add_label("a")
+    assert ax.panellabel is not None
     return ax.panellabel
 
 

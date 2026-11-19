@@ -1,3 +1,5 @@
+from collections.abc import Generator
+
 import pytest
 from matplotlib.pyplot import close
 
@@ -5,7 +7,7 @@ import scilayout
 
 
 @pytest.fixture
-def fig() -> scilayout.classes.SciFigure:
+def fig() -> Generator[scilayout.classes.SciFigure, None, None]:
     scifig = scilayout.classes.SciFigure()
     scifig.set_size_cm(13, 10)
     yield scifig

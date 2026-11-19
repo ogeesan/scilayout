@@ -47,6 +47,7 @@ class TestSVGExport:
 
         # Find the specific <g> element with id="axes_1"
         namespace = {"svg": "http://www.w3.org/2000/svg"}
+        assert root is not None
         axes_group = root.find('.//svg:g[@id="axes_1"]', namespaces=namespace)
         assert axes_group is not None, "Group with id='axes_1' not found in SVG."
 

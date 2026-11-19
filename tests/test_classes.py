@@ -1,4 +1,5 @@
 import unittest
+from collections.abc import Generator
 
 import pytest
 
@@ -6,7 +7,7 @@ from scilayout.classes import PanelAxes, SciFigure
 
 
 @pytest.fixture
-def fig() -> SciFigure:
+def fig() -> Generator[SciFigure, None, None]:
     scifig = SciFigure()
     yield scifig
     scifig.close()
