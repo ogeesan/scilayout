@@ -1,7 +1,8 @@
 import unittest
 
+
 class MyTestCase(unittest.TestCase):
-    def __init__(self, methodName='runTest'):
+    def __init__(self, methodName="runTest"):
         super().__init__(methodName)
         # Initialize any necessary resources or variables here
 
@@ -17,5 +18,6 @@ class MyTestCase(unittest.TestCase):
         # Test code goes here
         pass
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

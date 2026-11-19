@@ -58,9 +58,9 @@ You are ready to use scilayout when you are able to write a function that takes 
 ```python
 def mydataplot(ax, data):
     ax.plot(data.x, data.y)
-    ax.set_title('My glorious title')
-    ax.set_xlabel('Time spent learning matplotlib')
-    ax.set_ylabel('Time required to create suitable graphs')
+    ax.set_title("My glorious title")
+    ax.set_xlabel("Time spent learning matplotlib")
+    ax.set_ylabel("Time required to create suitable graphs")
 ```
 
 ### Downsides to using Python to make your figures

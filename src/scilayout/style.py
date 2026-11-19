@@ -16,47 +16,50 @@ defaultstyles = {
     # classes.py
     # i.e. special cases of text/label styling
     # 'figuretext.font': 'sans-serif',
-    'figuretext.fontsize': 8,
-    'figuretext.fontstyle': 'normal',
-    'figuretext.fontweight': 'normal',
-    'panellabel.case': None,
-    'panellabel.font': 'sans-serif',
-    'panellabel.fontsize': 12,
-    'panellabel.fontstyle': 'normal',
-    'panellabel.fontweight': 'bold',
-    'panellabel.xoffset': -0.5,
-    'panellabel.yoffset': -0.1,
-    
-    'scalebars.fontsize': 8,
-    'scalebars.linewidth': 1,
-    'stats.linecolor': 'black',
-    'stats.linewidth': 1,
-    'stats.drop_amount': 0.025,
+    "figuretext.fontsize": 8,
+    "figuretext.fontstyle": "normal",
+    "figuretext.fontweight": "normal",
+    "panellabel.case": None,
+    "panellabel.font": "sans-serif",
+    "panellabel.fontsize": 12,
+    "panellabel.fontstyle": "normal",
+    "panellabel.fontweight": "bold",
+    "panellabel.xoffset": -0.5,
+    "panellabel.yoffset": -0.1,
+    "scalebars.fontsize": 8,
+    "scalebars.linewidth": 1,
+    "stats.linecolor": "black",
+    "stats.linewidth": 1,
+    "stats.drop_amount": 0.025,
 }
+
 
 class StyleDictionary(dict):
     """A dictionary that allows access to keys as attributes"""
+
     # This is like matplotlib.rcParams but not so complicated (and validated) that it does your head in
-    
+
     def __init__(self):
         super().__init__(defaultstyles.copy())
-    
+
     def __setitem__(self, name, value):
         # Validate the key
         if name not in self.keys():
             raise ValueError(f"Invalid key: {name}. Can only set existing keys.")
         super().__setitem__(name, value)
-        
+
     def _setitem_bypass(self, name, value):
         """Bypass the validation for setting the dictionary directly"""
         super().__setitem__(name, value)
-    
+
     def __getattr__(self, key):
         return self[key]
+
 
 params = StyleDictionary()
 
 # --- Config file handling ---
+
 
 def _load_config(filepath):
     """Load a configuration file to set parameters
@@ -67,9 +70,10 @@ def _load_config(filepath):
     """
     # Why JSON and not the same format as matplotlib? Because their implementation is too complicated to replicate here.
     # Fight me.
-    with open(filepath, 'r') as f:
+    with open(filepath, "r") as f:
         config = json.load(f)
     return config
+
 
 def use(filepath, params=params, allow_only_valid_keys=True):
     """Use a configuration file to set parameters
@@ -82,7 +86,7 @@ def use(filepath, params=params, allow_only_valid_keys=True):
     :type allow_only_valid_keys: bool, optional
     """
     config = _load_config(filepath)
-    
+
     if allow_only_valid_keys:
         config_keys = config.keys()
         valid_keys = params.keys()
@@ -96,11 +100,12 @@ def use(filepath, params=params, allow_only_valid_keys=True):
             # For example, if you're adding a new parameter called 'newparam', you could do:
             # params._setitem('newparam', 'defaultvalue')
             raise ValueError(f"Invalid keys in configuration file: {failing_keys}")
-    
+
     for key in config:
         if key in params:
-            # If allow_only_valid_keys is False, this would allow you to have other non-scilayout parameters in the config file 
+            # If allow_only_valid_keys is False, this would allow you to have other non-scilayout parameters in the config file
             params[key] = config[key]
+
 
 def reset():
     """Reset the parameters to the default values"""

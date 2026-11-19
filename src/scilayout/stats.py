@@ -26,7 +26,9 @@ class StatsLine:
         self.linewidth = 1
         self.color = "black"
         self.drop_amount = 0.025
-        self.transform = transforms.blended_transform_factory(ax.transData, ax.transAxes)
+        self.transform = transforms.blended_transform_factory(
+            ax.transData, ax.transAxes
+        )
         self.draw()
 
     def draw(self) -> None:
@@ -42,15 +44,23 @@ class StatsLine:
 
         # TODO: implement style support here
         # turn off clip
-        stylekwargs = dict(color=self.color,
-                           linewidth=self.linewidth,
-                           transform=self.transform,
-                           clip_on=False,
-                           label="_nolegend_")
+        stylekwargs = dict(
+            color=self.color,
+            linewidth=self.linewidth,
+            transform=self.transform,
+            clip_on=False,
+            label="_nolegend_",
+        )
 
-        self.main_bar = self.ax.plot([self.x0, self.x1], [self.y, self.y], **stylekwargs)
-        self.left_drop = self.ax.plot([self.x0, self.x0], [self.y, self.y - self.drop_amount], **stylekwargs)
-        self.right_drop = self.ax.plot([self.x1, self.x1], [self.y, self.y - self.drop_amount], **stylekwargs)
+        self.main_bar = self.ax.plot(
+            [self.x0, self.x1], [self.y, self.y], **stylekwargs
+        )
+        self.left_drop = self.ax.plot(
+            [self.x0, self.x0], [self.y, self.y - self.drop_amount], **stylekwargs
+        )
+        self.right_drop = self.ax.plot(
+            [self.x1, self.x1], [self.y, self.y - self.drop_amount], **stylekwargs
+        )
 
         # Restore the xy limits
         self.ax.set_xlim(xlim)
@@ -76,5 +86,7 @@ class StatsLine:
                 transform[key] = self.ax.transAxes
             else:
                 raise ValueError(f"Unknown transform type {val}")
-        self.transform = transforms.blended_transform_factory(transform["x"], transform["y"])
+        self.transform = transforms.blended_transform_factory(
+            transform["x"], transform["y"]
+        )
         self.draw()

@@ -8,8 +8,8 @@ from matplotlib.axes import Axes
 from . import locations
 
 if TYPE_CHECKING:
-
     from .classes import SciFigure
+
 
 class GuideGridClass:
     """Handle the creation of a grid overlay for a figure.
@@ -20,7 +20,7 @@ class GuideGridClass:
 
     """
 
-    ax : Axes
+    ax: Axes
     """Axes tied to figure that has its lims sent to figure cm size."""
     # lines : dict[str, dict[float, Line2D]] # TODO: this is broke
 
@@ -89,7 +89,12 @@ class GuideGridClass:
         mesh = np.meshgrid(xlocs, ylocs)
         # Plot 1cm markers
         self.minor_scatter = self.ax.scatter(
-            mesh[0], mesh[1], alpha=0.3, color="k", s=5, marker="+",
+            mesh[0],
+            mesh[1],
+            alpha=0.3,
+            color="k",
+            s=5,
+            marker="+",
         )
 
         # Plot half_spacer
@@ -112,7 +117,12 @@ class GuideGridClass:
         ylocs = np.arange(0, height_cm + 1, self.major_interval)
         meshmajor = np.meshgrid(xlocs, ylocs)
         self.major_scatter = self.ax.scatter(
-            meshmajor[0], meshmajor[1], color="k", marker="+", lw=2, alpha=0.3,
+            meshmajor[0],
+            meshmajor[1],
+            color="k",
+            marker="+",
+            lw=2,
+            alpha=0.3,
         )
 
         # Draw user defines guidelines
