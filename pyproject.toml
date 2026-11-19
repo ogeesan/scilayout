@@ -70,8 +70,8 @@ dev = [
     "defusedxml>=0.7.1",
     "ipython>=8.12.3",
     "mkdocs-material>=9.6.20",
-    "pyqt5==5.15.11",          # windows compatibility
-    "pyqt5-qt5==5.15.2",       # windows compatibility
+    "pyqt5==5.15.11; sys_platform == 'win32'",          # windows compatibility
+    "pyqt5-qt5==5.15.2; sys_platform == 'win32'",       # windows compatibility
     "pytest>=8.4.2",
     "pytest-cov>=7.0.0",
 ]
