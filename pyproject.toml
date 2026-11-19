@@ -81,4 +81,5 @@ dev = [
     "pyqt5-qt5==5.15.2; sys_platform == 'win32'",       # windows compatibility
     "pytest>=8.4.2",
     "pytest-cov>=7.0.0",
+    "ruff>=0.17.6",
 ]
