@@ -8,7 +8,7 @@ dynamic = ["version"]
 authors = [{ name = "George Stuyt" }]
 description = "Create axes from top left of figure in centimetres to simplify scientific figure generation."
 dependencies = ["matplotlib", "numpy"]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 readme = "README.md"
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
