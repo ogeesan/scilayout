@@ -34,7 +34,7 @@ class TestSVGExport:
     def test_svg_export(self, fig):
         # Generate the SVG file using your module's functionality
         fig.set_size_cm(10, 10)
-        _ = fig.add_panel((2, 2, 7, 6))
+        _ = fig.add_panel((2, 2, 7, 6), method="extent")
 
         # Save the figure as an SVG
         output_path = "test_outputs/test_output.svg"

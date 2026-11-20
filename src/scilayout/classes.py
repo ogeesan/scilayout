@@ -15,7 +15,7 @@ from matplotlib.text import Text
 
 from . import base, locations, style
 from .grid import GuideGridClass
-from .types import centimetres
+from .types import ExtentCM, centimetres
 
 LocationCM = tuple[centimetres, centimetres, centimetres, centimetres]
 """Location in cm (x0, y0, x1, y1) or (x, y, w, h), origin upper left."""
@@ -68,7 +68,7 @@ class SciFigure(figure.Figure):
         self,
         location: LocationCM,
         panellabel: str | None = None,
-        method: str = "bbox",
+        method: str | None = None,
         **kwargs: Any,
     ) -> PanelAxes:
         """Add panel (axes) to the figure.
@@ -79,21 +79,24 @@ class SciFigure(figure.Figure):
 
         Call signature ::
 
-            fig.add_panel((1, .5, 5, 6.5), method="size")
+            fig.add_panel((1, .5, 5, 6.5), method="bounds")
 
 
         Parameters
         ----------
         location : tuple[float, float, float, float]
-            Location of the panel in cm (x0, y0, x1, y1). Can be:
-            - Bound: (x, y, w, h)
-            - Extent: (x0, y0, x1, y1)
+            Location of the panel in cm from the upper left of the figure.
+            Read according to ``method``.
         panellabel : str | None
             Letter to initialise the panel with.
-        method : str
-            How to interpret the coordinates of the location.
-            "bbox" (default) interprets x2 and y2 as coordinates.
-            "size" interprets x2 and y2 as width and height.
+        method : {"bounds", "extent"}
+            How to interpret the location.
+            "bounds" reads (x, y, width, height).
+            "extent" reads (x0, y0, x1, y1), the upper left and lower right corners.
+            Not specifying a method currently means "extent", but the default will
+            change to "bounds" in a future release. Specify it to avoid the warning.
+            The old names "bbox" and "size" are deprecated aliases of "extent" and
+            "bounds".
         kwargs : dict
             Key word arguments to pass to PanelAxes initialisation.
 
@@ -107,6 +110,7 @@ class SciFigure(figure.Figure):
         # add_axes(rect, projection=None, polar=False, **kwargs)
         # add_axes(ax)
         # with rect being converted into bm?
+        method = locations.resolve_method(method)
         return PanelAxes(
             self,
             location=location,
@@ -209,9 +213,10 @@ class PanelAxes(Axes):
         fig: Figure,
         location: LocationCM,
         panellabel: str | None = None,
-        method: str = "bbox",
+        method: str | None = None,
         **kwargs: Any,
     ) -> None:
+        method = locations.resolve_method(method)
         rect = (0, 0, 1, 1)  # dummy rect
         super().__init__(fig, rect, **kwargs)
         fig.add_axes(self)  # apparently this isn't in the super or something
@@ -224,33 +229,24 @@ class PanelAxes(Axes):
     def set_location(
         self,
         location: LocationCM,
-        method: str = "bbox",
+        method: str | None = None,
     ) -> None:
         """Set location of panel in cm.
 
-        If method is 'size' then location is (x, y, width, height)
+        Parameters
+        ----------
+        location : tuple[float, float, float, float]
+            Coordinates from the upper left of the figure in cm, read according to
+            ``method``.
+        method : {"bounds", "extent"}
+            "bounds" reads (x, y, width, height).
+            "extent" reads (x0, y0, x1, y1), the upper left and lower right corners.
+            Not specifying a method currently means "extent", but the default will
+            change to "bounds" in a future release. Specify it to avoid the warning.
 
-        location : ExtentCM | BoundCM | Tuple[float, float, float, float]
-            Coordinates from top left corner in cm
-        method : str
-            Coordinate system of 'bbox' or 'size', default 'bbox'
         """
-        assert len(location) == 4, "Location must be of length 4"
-        if method == "size":
-            location = (
-                location[0],
-                location[1],
-                location[0] + location[2],
-                location[1] + location[3],
-            )
-            # location = ExtentCM(*location)  # TODO: can't set attribute
-
-        elif method == "bbox":
-            pass
-        else:
-            msg = 'Method must be either "size" or "bbox"'
-            raise ValueError(msg)
-        self.set_position(locations.locationcm_to_position(self._fig, location))
+        extent = locations.to_extent(location, locations.resolve_method(method))
+        self.set_position(locations.locationcm_to_position(self._fig, extent))
         if self.panellabel is not None:
             self.panellabel.set_offset(self.panellabel.xoffset, self.panellabel.yoffset)
 
@@ -259,8 +255,11 @@ class PanelAxes(Axes):
         """The parent figure."""
         return cast("Figure", self.get_figure())
 
-    def get_location(self) -> tuple:
-        """Get location of axes in cm (from top left corner)."""
+    def get_location(self) -> ExtentCM:
+        """Get location of axes in cm as an extent (x0, y0, x1, y1).
+
+        The origin is the upper left corner of the figure.
+        """
         # TODO: use self.get_figure().transCM?
         figsize = locations.inch_to_cm(self._fig.get_size_inches())
         bbox_pos = self.get_position().get_points()
@@ -273,8 +272,7 @@ class PanelAxes(Axes):
         xmax = xmax * figsize[0]
         ymin = ymin * figsize[1]
         ymax = ymax * figsize[1]
-        # TODO: improve type hinting
-        return xmin, ymin, xmax, ymax
+        return ExtentCM(float(xmin), float(ymin), float(xmax), float(ymax))
 
     def add_label(
         self,

@@ -2,14 +2,102 @@
 
 from __future__ import annotations
 
-from typing import Any, overload
+import warnings
+from typing import Any, Literal, overload
 
 import matplotlib.figure
 import numpy as np
 from matplotlib.transforms import Transform
 from numpy.typing import ArrayLike
 
-from .types import centimetres
+from .types import Bound, Extent, ExtentCM, centimetres
+
+LocationMethod = Literal["bounds", "extent"]
+"""How to read a 4-tuple location.
+
+- ``"bounds"``: (x, y, width, height)
+- ``"extent"``: (x0, y0, x1, y1), the corners
+"""
+
+_DEPRECATED_METHODS: dict[str, LocationMethod] = {"size": "bounds", "bbox": "extent"}
+
+
+def resolve_method(method: str | None, stacklevel: int = 3) -> LocationMethod:
+    """Validate a location ``method``, warning about deprecated usage.
+
+    ``None`` (not specifying a method) currently means ``"extent"`` but this will
+    change to ``"bounds"``. The old names ``"bbox"`` and ``"size"`` are deprecated
+    aliases of ``"extent"`` and ``"bounds"``.
+
+    Parameters
+    ----------
+    method : str | None
+        ``"bounds"``, ``"extent"``, or a deprecated value.
+    stacklevel : int
+        Passed to ``warnings.warn``. The default points at the caller of the
+        function that called this one.
+
+    Returns
+    -------
+    LocationMethod
+        ``"bounds"`` or ``"extent"``.
+
+    """
+    if method is None:
+        warnings.warn(
+            "The default interpretation of a location tuple is changing from "
+            "'extent' (x0, y0, x1, y1) to 'bounds' (x, y, width, height) in a "
+            "future release. Pass method='extent' to keep the current behaviour, "
+            "or method='bounds' to adopt the new one.",
+            FutureWarning,
+            stacklevel=stacklevel,
+        )
+        return "extent"
+    if method in _DEPRECATED_METHODS:
+        new = _DEPRECATED_METHODS[method]
+        warnings.warn(
+            f"method={method!r} is deprecated, use method={new!r} instead.",
+            FutureWarning,
+            stacklevel=stacklevel,
+        )
+        return new
+    if method in ("bounds", "extent"):
+        return method  # pyright: ignore[reportReturnType]
+    msg = f"method must be 'bounds' or 'extent', not {method!r}"
+    raise ValueError(msg)
+
+
+def to_extent(location: tuple[float, ...], method: LocationMethod) -> ExtentCM:
+    """Convert a 4-tuple location in cm to an extent (corners).
+
+    A :class:`~scilayout.types.Bound` or :class:`~scilayout.types.Extent` instance
+    is interpreted by its type and ``method`` is ignored.
+
+    Parameters
+    ----------
+    location : tuple[float, float, float, float]
+        Location in cm, origin at the upper left of the figure.
+    method : LocationMethod
+        ``"bounds"`` reads (x, y, w, h), ``"extent"`` reads (x0, y0, x1, y1).
+
+    Returns
+    -------
+    ExtentCM
+        Corners (x0, y0, x1, y1) in cm.
+
+    """
+    if isinstance(location, Extent):
+        return location
+    if len(location) != 4:
+        msg = f"location must have 4 values, got {len(location)}"
+        raise ValueError(msg)
+    if isinstance(location, Bound) or method == "bounds":
+        x, y, w, h = location
+        if w < 0 or h < 0:
+            msg = f"width and height must be non-negative, got ({w}, {h})"
+            raise ValueError(msg)
+        return ExtentCM(x, y, x + w, y + h)
+    return ExtentCM(*location)
 
 
 def locationcm_to_position(

@@ -9,7 +9,7 @@ import scilayout
 @pytest.fixture
 def ax() -> Generator[scilayout.classes.PanelAxes, None, None]:
     fig = scilayout.figure()
-    testax = fig.add_panel((1, 2, 5, 5), method="size")
+    testax = fig.add_panel((1, 2, 5, 5), method="bounds")
     yield testax
     close(fig)
 
@@ -33,7 +33,7 @@ class TestPanelLabels:
 
     def test_panel_reposition(self, ax, panellabel):
         """Test that the label is repositioned when the panel is moved"""
-        ax.set_location((2, 3, 6, 6), method="size")
+        ax.set_location((2, 3, 6, 6), method="bounds")
         xoffset = scilayout.style.params["panellabel.xoffset"]
         yoffset = scilayout.style.params["panellabel.yoffset"]
         pos = panellabel.get_location()

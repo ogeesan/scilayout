@@ -1,6 +1,6 @@
 """Type definitions for scilayout."""
 
-from dataclasses import dataclass
+from numbers import Real
 from typing import NamedTuple
 
 centimetres = float
@@ -11,27 +11,31 @@ fraction = float
 """A type alias for figure fraction, used for positions and dimensions in figures."""
 
 
-@dataclass
-class Extent(NamedTuple):
-    """A named tuple to hold extent (positions of corners) coordinates."""
-
+class _ExtentFields(NamedTuple):
     x0: float
     y0: float
     x1: float
     y1: float
 
-    def __post_init__(self) -> None:
-        """Ensure that the coordinates are in the correct order."""
-        if not all(
-            isinstance(coord, (int, float))
-            for coord in (self.x0, self.y0, self.x1, self.y1)
-        ):
+
+class Extent(_ExtentFields):
+    """Extent of a rectangle given by its corners (x0, y0, x1, y1).
+
+    Validated on creation: all values must be real numbers and ``x0 <= x1`` and
+    ``y0 <= y1``. Behaves as an immutable 4-tuple with named fields.
+    """
+
+    __slots__ = ()
+
+    def __new__(cls, x0: float, y0: float, x1: float, y1: float) -> "Extent":
+        """Create an Extent, checking the coordinates are numeric and ordered."""
+        if not all(isinstance(c, Real) for c in (x0, y0, x1, y1)):
             msg = "Coordinates must be numeric (int or float)."
             raise TypeError(msg)
-
-        if self.x0 > self.x1 or self.y0 > self.y1:
+        if x0 > x1 or y0 > y1:
             msg = "Coordinates must be in the order: (x0, y0, x1, y1)."
             raise ValueError(msg)
+        return super().__new__(cls, x0, y0, x1, y1)
 
 
 class Bound(NamedTuple):

@@ -46,7 +46,7 @@ def figure(**kwargs: Any) -> classes.SciFigure:
     %matplotlib
     import scilayout
     fig = scilayout.figure()
-    ax_1 = fig.add_panel((1, 2, 4, 5))
+    ax_1 = fig.add_panel((1, 2, 4, 5), method="bounds")
     ax_1
     ```
     :param name: Name of the figure

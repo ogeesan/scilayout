@@ -15,11 +15,14 @@ The idea is to make and interact with Matplotlib axes in centimetres from the to
 # Create a figure object
 >>> fig = scilayout.figure()
 
-# Create a panel, specifying location in cm from top left
->>> myax = fig.add_panel((1, 1, 5, 5))
+# Create a panel, specifying location (x, y, width, height) in cm from top left
+>>> myax = fig.add_panel((1, 1, 5, 5), method="bounds")
 
-# move the panel after it's been created and set it's location based on size
->>> myax.set_location((2, 10, 3, 3), method='size')
+# move the panel after it's been created
+>>> myax.set_location((2, 10, 3, 3), method="bounds")
+
+# or use corners (x0, y0, x1, y1)
+>>> myax.set_location((2, 10, 5, 13), method="extent")
 
 ```
 
