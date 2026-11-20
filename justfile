@@ -37,6 +37,28 @@ test *args:
 cov:
     uv run pytest --cov=scilayout --cov-report=term-missing
 
+# Sanity check: run the tests against a spread of matplotlib versions (needs network, ~1 minute)
+compat:
+    #!/usr/bin/env bash
+    set -u
+    failed=0
+    # matplotlib before 3.9 needs numpy 1.x
+    for spec in "3.5.0 numpy==1.21.3" "3.5.3 numpy<2" "3.6.3 numpy<2" "3.7.5 numpy<2" "3.8.4 numpy<2" "3.9.4" "3.10.5" "latest"; do
+        mpl=${spec%% *}
+        np=""
+        [[ "$spec" == *" "* ]] && np=${spec#* }
+        args=(--isolated --python 3.10)
+        if [[ "$mpl" == latest ]]; then args+=(--with matplotlib --upgrade); else args+=(--with "matplotlib==$mpl"); fi
+        [[ -n "$np" ]] && args+=(--with "$np")
+        printf '%-36s' "matplotlib $mpl ${np:+($np)}"
+        if out=$(MPLBACKEND=Agg uv run "${args[@]}" pytest -q -p no:cacheprovider 2>&1); then
+            echo "$(echo "$out" | tail -1)"
+        else
+            echo "FAILED"; echo "$out" | tail -15; failed=1
+        fi
+    done
+    exit $failed
+
 # Lint, type check and tests
 check: lint typecheck test
 

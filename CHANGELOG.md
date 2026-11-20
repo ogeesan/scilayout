@@ -3,6 +3,13 @@
 All notable changes to scilayout are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project uses [EffVer](https://jacobtomlinson.dev/effver/)
 
+## [Unreleased]
+
+### Changed
+
+- Declared the supported dependency versions: matplotlib 3.5 or newer and numpy 1.21.3 or newer.
+  The tests pass on these versions, which before were not stated.
+
 ## [0.2.0] - 2026-11-20
 
 This release prepares the API for 1.0.
@@ -85,5 +92,6 @@ See [Locations and coordinates](https://ogeesan.github.io/scilayout/coordinates/
 
 See the [release notes](https://github.com/ogeesan/scilayout/releases/tag/v0.1.2).
 
+[Unreleased]: https://github.com/ogeesan/scilayout/compare/v0.2.0...HEAD
 [0.2.0]: https://github.com/ogeesan/scilayout/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/ogeesan/scilayout/releases/tag/v0.1.2
