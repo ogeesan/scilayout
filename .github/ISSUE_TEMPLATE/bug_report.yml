@@ -1,0 +1,33 @@
+name: Bug report
+description: Something in scilayout doesn't work as expected
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: code
+    attributes:
+      label: Minimal example
+      description: The shortest code that shows the problem.
+      render: python
+    validations:
+      required: false
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: Output of `python -c "import scilayout, matplotlib, numpy; print(scilayout.__version__, matplotlib.__version__, numpy.__version__)"`
+    validations:
+      required: true
+  - type: input
+    id: backend
+    attributes:
+      label: Matplotlib backend and OS
+      description: For example "QtAgg on macOS 15", or "inline in Jupyter on Windows 11". Run `matplotlib.get_backend()` to find the backend.
+    validations:
+      required: true

@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use scilayout in your work, please cite it using these metadata."
+title: "scilayout"
+abstract: "Create axes from the top left of a figure in centimetres to simplify scientific figure generation with matplotlib."
+type: software
+authors:
+  - family-names: Stuyt
+    given-names: George
+    orcid: https://orcid.org/0000-0002-9649-7212
+license: GPL-3.0-or-later
+repository-code: "https://github.com/ogeesan/scilayout"
+url: "https://ogeesan.github.io/scilayout/"
+keywords:
+  - matplotlib
+  - figures
+  - scientific publishing
+  - layout

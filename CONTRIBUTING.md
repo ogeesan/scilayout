@@ -1,16 +1,42 @@
-## Contributing
+# Contributing
 
-Thank you for your interest in contributing to this project. Here are some guidelines to help you get started.
+Thank you for your interest in contributing to scilayout.
 
-### Getting Started
+## Getting started
 
-1. Fork this repository.
-2. Clone the forked repository to your local machine.
-3. Make your changes and test them locally.
-4. Commit your changes and push them to your forked repository.
-5. Open a pull request to submit your changes for review.
+1. Fork the repository and clone your fork.
+2. Install [uv](https://docs.astral.sh/uv/) and [just](https://just.systems/).
+3. Run `uv sync` to install the project and its development tools.
+4. Optionally run `uvx pre-commit install` to lint and format on every commit.
+5. Make your change on a branch, then open a pull request.
 
+## Checks
 
-### Reporting Issues
+`just` lists every recipe.
+The ones you will use most:
 
-If you encounter any issues or have suggestions for improvement, please open an issue on the GitHub repository. Provide as much detail as possible to help us understand and address the problem.
+| Command | What it does |
+| --- | --- |
+| `just check` | Lint, type check and run the tests. |
+| `just format` | Format the code with ruff. |
+| `just cov` | Run the tests and show uncovered lines. |
+| `just visual` | Run the visual tests and keep their SVG and PNG output in `test_outputs/` to look at. |
+| `just compat` | Run the tests against several matplotlib versions (needs network). |
+| `just docs` | Serve the documentation locally. |
+| `just docs-build` | Build the documentation and fail on warnings or broken cross-references. |
+
+Continuous integration runs the same checks on Linux, macOS and Windows.
+
+## Guidelines
+
+- Add tests for new behaviour.
+- Write docstrings in numpydoc style.
+  The API reference is built from them.
+- Add a line to the "Unreleased" section of `CHANGELOG.md` for any change a user would notice.
+- Scilayout supports matplotlib 3.5 or newer, numpy 1.21.3 or newer and Python 3.10 or newer.
+- In Markdown files, write one sentence per line.
+
+## Reporting issues
+
+Open an issue on GitHub and fill in the template.
+The matplotlib version, the backend and your operating system matter for most layout bugs.
