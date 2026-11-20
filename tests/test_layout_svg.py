@@ -133,13 +133,16 @@ def text_of(root: Element, gid: str) -> TextInfo:
         assert translate is not None
         x, y = float(translate.group(1)), float(translate.group(2))
     anchor = re.search(r"text-anchor: (\w+)", style)
+    # matplotlib 3.5-3.6 write "font: 10px ...", later versions "font-size: 10px"
+    size = re.search(r"font(?:-size)?:[^;]*?([\d.]+)px", style)
+    assert size is not None
     return TextInfo(
         x=x * CM_PER_PT,
         y=y * CM_PER_PT,
         anchor=anchor.group(1) if anchor else "start",
         content=(text.text or "").strip(),
         rotation=float(rotate.group(1)) if rotate else 0.0,
-        fontsize=float(re.search(r"font-size: ([\d.]+)px", style).group(1)),  # pyright: ignore[reportOptionalMemberAccess]
+        fontsize=float(size.group(1)),
     )
 
 
