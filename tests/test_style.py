@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 import pytest
 
@@ -145,6 +146,26 @@ class TestStyleAffectsElements:
         panel.add_label("Ab")
         assert panel.panellabel is not None
         assert panel.panellabel.text.get_text() == "Ab"
+
+    def test_panellabel_fontstyle(self, panel):
+        style.params["panellabel.fontstyle"] = "italic"
+        panel.add_label("a")
+        assert panel.panellabel is not None
+        assert panel.panellabel.text.get_fontstyle() == "italic"
+
+    def test_every_parameter_is_used_somewhere(self):
+        """A parameter nothing reads would silently do nothing."""
+        import scilayout
+
+        root = Path(scilayout.__file__).parent
+        sources = "\n".join(
+            p.read_text() for p in root.glob("*.py") if p.name != "style.py"
+        )
+        for key in style.defaultstyles:
+            used = f'"{key}"' in sources or (
+                key.startswith("figuretext.") and 'f"figuretext.' in sources
+            )
+            assert used, f"style parameter {key!r} is not used by any element"
 
     def test_panellabel_fontsize(self, panel):
         style.params["panellabel.fontsize"] = 17

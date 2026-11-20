@@ -16,7 +16,7 @@ Examples
 
 Notes
 -----
-Parameters that are applied today:
+All parameters:
 
 | Parameter | Used for |
 | --- | --- |
@@ -24,14 +24,17 @@ Parameters that are applied today:
 | `panellabel.font` | font family of panel labels |
 | `panellabel.fontsize` | font size of panel labels (pt) |
 | `panellabel.fontweight` | font weight of panel labels |
+| `panellabel.fontstyle` | font style of panel labels |
 | `panellabel.xoffset` | label offset to the right of the panel corner (cm) |
 | `panellabel.yoffset` | label offset below the panel corner (cm) |
 | `scalebars.fontsize` | default font size of scalebar text (pt) |
-
-Defined but not applied yet (setting them has no effect): ``panellabel.fontstyle``,
-``figuretext.fontsize``, ``figuretext.fontstyle``, ``figuretext.fontweight``,
-``scalebars.linewidth``, ``stats.linecolor``, ``stats.linewidth`` and
-``stats.drop_amount``.
+| `scalebars.linewidth` | default linewidth of scalebars |
+| `figuretext.fontsize` | default font size of `FigureText` (pt) |
+| `figuretext.fontstyle` | default font style of `FigureText` |
+| `figuretext.fontweight` | default font weight of `FigureText` |
+| `stats.linecolor` | color of `StatsLine` |
+| `stats.linewidth` | linewidth of `StatsLine` |
+| `stats.drop_amount` | length of a `StatsLine`'s drops, as a fraction of the axes height |
 """
 
 import json

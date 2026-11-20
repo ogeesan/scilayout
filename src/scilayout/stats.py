@@ -4,6 +4,8 @@ from matplotlib import transforms
 from matplotlib.axes import Axes
 from matplotlib.transforms import Transform
 
+from . import style
+
 __all__ = ["StatsLine"]
 
 
@@ -32,9 +34,9 @@ class StatsLine:
         self.main_bar = None
         self.right_drop = None
         self.left_drop = None
-        self.linewidth = 1
-        self.color = "black"
-        self.drop_amount = 0.025
+        self.linewidth = style.params["stats.linewidth"]
+        self.color = style.params["stats.linecolor"]
+        self.drop_amount = style.params["stats.drop_amount"]
         self.transform = transforms.blended_transform_factory(
             ax.transData, ax.transAxes
         )
@@ -51,7 +53,6 @@ class StatsLine:
         xlim = self.ax.get_xlim()
         ylim = self.ax.get_ylim()
 
-        # TODO: implement style support here
         # turn off clip
         stylekwargs = {
             "color": self.color,

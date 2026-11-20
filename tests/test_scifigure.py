@@ -5,6 +5,7 @@ import pytest
 from matplotlib.figure import Figure
 
 import scilayout
+from scilayout import style
 from scilayout.classes import FigureText, PanelAxes, PanelLabel, SciFigure
 
 
@@ -26,6 +27,24 @@ class TestSciFigure:
     def test_set_size_cm(self, scifig):
         scifig.set_size_cm(10, 5)
         assert tuple(scifig.get_size_inches()) == pytest.approx((10 / 2.54, 5 / 2.54))
+
+    def test_resizing_keeps_panels_at_their_location_in_cm(self, scifig):
+        ax = scifig.add_panel((2, 3, 4, 2), method="bounds", panellabel="a")
+        scifig.set_size_cm(20, 15)
+        assert ax.get_location() == pytest.approx((2, 3, 6, 5))
+        scifig.set_size_cm(8, 6)
+        assert ax.get_location() == pytest.approx((2, 3, 6, 5))
+
+    def test_resizing_moves_panel_labels_with_the_panel(self, scifig):
+        ax = scifig.add_panel((2, 3, 4, 2), method="bounds", panellabel="a")
+        assert ax.panellabel is not None
+        before = ax.panellabel.get_location()
+        scifig.set_size_cm(20, 15)
+        assert ax.panellabel.get_location() == pytest.approx(before)
+
+    def test_resizing_with_no_panels_works(self, scifig):
+        scifig.set_size_cm(20, 15)
+        assert tuple(scifig.get_size_inches()) == pytest.approx((20 / 2.54, 15 / 2.54))
 
     def test_panels_are_added_to_the_figure(self, scifig):
         ax = scifig.add_panel((1, 1, 3, 3), method="bounds")
@@ -154,6 +173,38 @@ class TestFigureText:
         x, y = text.text.get_position()
         assert x == pytest.approx(0.5)
         assert y == pytest.approx(0.5)
+
+    def test_default_font_comes_from_the_style(self, scifig):
+        text = FigureText(2, 3, "hello", scifig)
+        assert text.text.get_fontsize() == style.params["figuretext.fontsize"]
+        assert text.text.get_fontstyle() == style.params["figuretext.fontstyle"]
+        assert text.text.get_fontweight() == style.params["figuretext.fontweight"]
+
+    def test_style_changes_apply_to_new_text(self, scifig):
+        style.params["figuretext.fontsize"] = 14
+        style.params["figuretext.fontstyle"] = "italic"
+        style.params["figuretext.fontweight"] = "bold"
+        text = FigureText(2, 3, "hello", scifig)
+        assert text.text.get_fontsize() == 14
+        assert text.text.get_fontstyle() == "italic"
+        assert text.text.get_fontweight() == "bold"
+
+    @pytest.mark.parametrize(
+        ("kwargs", "getter", "expected"),
+        [
+            ({"fontsize": 20}, "get_fontsize", 20),
+            ({"size": 20}, "get_fontsize", 20),
+            ({"fontstyle": "italic"}, "get_fontstyle", "italic"),
+            ({"style": "italic"}, "get_fontstyle", "italic"),
+            ({"fontweight": "bold"}, "get_fontweight", "bold"),
+            ({"weight": "bold"}, "get_fontweight", "bold"),
+        ],
+    )
+    def test_explicit_font_options_beat_the_style(
+        self, scifig, kwargs, getter, expected
+    ):
+        text = FigureText(2, 3, "hello", scifig, **kwargs)
+        assert getattr(text.text, getter)() == expected
 
     def test_kwargs_go_to_text(self, scifig):
         text = FigureText(2, 3, "hello", scifig, fontsize=15)

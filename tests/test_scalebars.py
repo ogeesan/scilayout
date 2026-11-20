@@ -126,6 +126,16 @@ class TestScaleBarStyle:
         assert bar.text.get_fontsize() == 14
         assert bar.line.get_linewidth() == 3
 
+    def test_linewidth_default_follows_style(self, panel):
+        style.params["scalebars.linewidth"] = 2.5
+        bar = ScaleBar(panel, (3, 4), 2, coordSystem="data")
+        assert bar.line.get_linewidth() == 2.5
+
+    def test_explicit_linewidth_beats_style(self, panel):
+        style.params["scalebars.linewidth"] = 2.5
+        bar = ScaleBar(panel, (3, 4), 2, coordSystem="data", lw=4)
+        assert bar.line.get_linewidth() == 4
+
     def test_fontsize_default_follows_style(self, panel):
         style.params["scalebars.fontsize"] = 11
         bar = ScaleBar(panel, (3, 4), 2, coordSystem="data")

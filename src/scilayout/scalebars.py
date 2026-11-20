@@ -111,7 +111,8 @@ class ScaleBar:
         textstring : str, optional
             Text to display. Defaults to the length and unit.
         lw : float, optional
-            Linewidth of the scalebar, 1 by default.
+            Linewidth of the scalebar. Defaults to the "scalebars.linewidth" style
+            parameter.
         fontsize : float, optional
             Font size of the text. Defaults to the "scalebars.fontsize" style parameter.
 
@@ -175,7 +176,7 @@ class ScaleBar:
         self.textstring = textstring
         self.hpos = hpos
         self.vpos = vpos
-        self.lw = 1 if lw is None else lw
+        self.lw = style.params["scalebars.linewidth"] if lw is None else lw
         self.fontsize = (
             style.params["scalebars.fontsize"] if fontsize is None else fontsize
         )

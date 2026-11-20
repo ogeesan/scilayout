@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 
+from scilayout import style
 from scilayout.stats import StatsLine
 
 
@@ -60,6 +61,24 @@ class TestStatsLine:
         assert np.asarray(bar.get_xdata()).tolist() == [2, 8]
         assert bar.get_color() == "red"
         assert bar.get_linewidth() == 3
+
+    def test_defaults_come_from_the_style(self, panel):
+        line = StatsLine(panel, 0.9, 2, 6)
+        assert line.color == style.params["stats.linecolor"]
+        assert line.linewidth == style.params["stats.linewidth"]
+        assert line.drop_amount == style.params["stats.drop_amount"]
+
+    def test_style_changes_apply_to_new_lines(self, panel):
+        style.params["stats.linecolor"] = "red"
+        style.params["stats.linewidth"] = 3
+        style.params["stats.drop_amount"] = 0.1
+        line = StatsLine(panel, 0.9, 2, 6)
+        assert line.main_bar is not None
+        assert line.left_drop is not None
+        assert line.main_bar[0].get_color() == "red"
+        assert line.main_bar[0].get_linewidth() == 3
+        ydata = np.asarray(line.left_drop[0].get_ydata()).tolist()
+        assert ydata == pytest.approx([0.9, 0.8])
 
     def test_default_transform_is_data_x_axes_y(self, panel):
         line = StatsLine(panel, 0.9, 2, 6)

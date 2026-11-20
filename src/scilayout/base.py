@@ -60,6 +60,7 @@ def create_panel_label(
         text,
         fontfamily=style.params["panellabel.font"],
         fontweight=style.params["panellabel.fontweight"],
+        fontstyle=style.params["panellabel.fontstyle"],
         size=style.params["panellabel.fontsize"],
         label="_nolegend_",  # Don't include in legend
         transform=cast("Figure", ax.get_figure()).transFigure,

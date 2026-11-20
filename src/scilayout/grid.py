@@ -4,7 +4,7 @@ Internal: this module is not part of the public API and may change without notic
 Use [`scilayout.SciFigure.draw_grid`][scilayout.classes.SciFigure.draw_grid] to show the guide grid.
 """
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from matplotlib.axes import Axes
@@ -26,7 +26,8 @@ class GuideGridClass:
 
     ax: Axes | None
     """Axes tied to figure that has its lims sent to figure cm size."""
-    # lines : dict[str, dict[float, Line2D]] # TODO: this is broke
+    lines: dict[str, dict[float, dict[str, Any]]]
+    """User guidelines by axis ("x" or "y"), then location, then line keyword arguments."""
 
     def __init__(
         self,
@@ -72,8 +73,6 @@ class GuideGridClass:
 
     def redraw(self) -> None:
         """Clear and draw the grid."""
-        # TODO: check what happens after self.remove() is called
-
         if self.ax is None:
             self.ax = self._create_axes()
         else:
@@ -85,9 +84,7 @@ class GuideGridClass:
         ax.set_ylim((height_cm, 0))
         ax.set_xlim((0, width_cm))
 
-        # TODO: handle major, minor, and the half-minor markers
-        #       Do I lock users in to 1cm grid or allow them to set the grid size?
-        # Generate positions of each cm marker
+        # Generate positions of each marker
         xlocs = np.arange(0, width_cm + 1, self.minor_interval)
         ylocs = np.arange(0, height_cm + 1, self.minor_interval)
 
@@ -169,17 +166,17 @@ class GuideGridClass:
         self.redraw()
 
     def _detach_ax(self) -> None:
-        """Detach the grid from the axes."""
-        if self.ax:
-            self.ax.clear()
+        """Remove the grid's axes from the figure (if it is still there) and forget it."""
+        if self.ax is not None:
+            if self.ax in self.figure.axes:
+                self.ax.remove()
             self.ax = None
+        self.major_scatter = None
+        self.minor_scatter = None
+        self.half_scatter = None
 
     def remove(self) -> None:
-        """Clean up resources."""
-        if self.major_scatter:
-            self.major_scatter.remove()
-        if self.half_scatter:
-            self.half_scatter.remove()
+        """Remove the grid from the figure. It is drawn again by ``show`` or ``redraw``."""
         self._detach_ax()
 
     def hide(self) -> None:

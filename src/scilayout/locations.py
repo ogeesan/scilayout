@@ -175,8 +175,6 @@ def locationcm_to_position(
     )
 
 
-# TODO: check precision conversions of integer
-# setting to location .5 and back again gives a slight difference
 @overload
 def cm_to_inch(cm: float) -> float: ...
 @overload

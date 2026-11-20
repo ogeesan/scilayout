@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import contextlib
-import warnings
 from pathlib import Path
 from typing import Any, cast
 
@@ -15,7 +14,6 @@ from matplotlib.figure import Figure
 from matplotlib.text import Text
 
 from . import base, locations, style
-from ._utils import find_stack_level
 from .grid import GuideGridClass
 from .types import ExtentCM, centimetres
 
@@ -75,6 +73,11 @@ class SciFigure(figure.Figure):
     def set_size_cm(self, w: float, h: float) -> None:
         """Set size of figure in cm.
 
+        Panels keep their location in cm from the upper left of the figure, and the
+        guide grid is redrawn to fit. This applies when the size is changed with this
+        method: setting the size with matplotlib's own ``set_size_inches`` leaves
+        panels at the same fraction of the figure.
+
         Parameters
         ----------
         w : float
@@ -83,8 +86,16 @@ class SciFigure(figure.Figure):
             Height (cm) of figure.
 
         """
+        # Panels are stored as fractions of the figure, so changing the size would move
+        # them. Put every panel back at its location in cm.
+        panels = [
+            (ax, ax.get_location()) for ax in self.axes if isinstance(ax, PanelAxes)
+        ]
         base.set_figure_size_cm(self, w, h)
-        # TODO: resize panels to preserve their position
+        for ax, location in panels:
+            ax.set_location(location, method="extent")
+        if self.grid.ax is not None:
+            self.grid.redraw()
 
     def add_panel(
         self,
@@ -133,10 +144,6 @@ class SciFigure(figure.Figure):
         >>> ax = fig.add_panel((1, 0.5, 6, 6.5), method="extent")  # x0, y0, x1, y1
 
         """
-        # TODO: should this be return self.fig.add_axes(rect, axes_class=PanelAxes)
-        # add_axes(rect, projection=None, polar=False, **kwargs)
-        # add_axes(ax)
-        # with rect being converted into bm?
         method = locations.resolve_method(method)
         return PanelAxes(
             self,
@@ -148,32 +155,46 @@ class SciFigure(figure.Figure):
 
     def draw_grid(
         self,
-        **kwargs: Any,
+        major_interval: float | None = None,
+        minor_interval: float | None = None,
+        half_spacer: bool | None = None,
     ) -> None:
         """Show the cm guide grid on the figure.
 
-        The grid has markers every 1 cm (and half cm), with larger markers every 5 cm,
-        measured from the upper left of the figure. It is removed by [`clear`][scilayout.classes.SciFigure.clear].
+        The grid has markers measured from the upper left of the figure: larger ones
+        every ``major_interval`` cm (5 by default), smaller ones every
+        ``minor_interval`` cm (1), and optionally crosses halfway between those. It is
+        removed by [`clear`][scilayout.classes.SciFigure.clear]. Settings given here
+        are kept for the next time the grid is drawn.
 
         Parameters
         ----------
-        **kwargs
-            Grid settings. Not implemented: giving any warns and they are ignored.
+        major_interval : float, optional
+            Spacing of the large markers in cm.
+        minor_interval : float, optional
+            Spacing of the small markers in cm.
+        half_spacer : bool, optional
+            Whether to add crosses halfway between the small markers.
 
-        Warns
-        -----
-        UserWarning
-            If any keyword arguments are given.
+        Raises
+        ------
+        ValueError
+            If an interval is not positive.
 
         """
-        # if kwargs are given warn that
-        # changing settings with this function is not implemented
-        if kwargs:
-            # TODO: implement changing grid settings
-            warnings.warn(
-                "Setting grid settings with draw_grid() is not implemented.",
-                stacklevel=find_stack_level(),
-            )
+        for name, interval in (
+            ("major_interval", major_interval),
+            ("minor_interval", minor_interval),
+        ):
+            if interval is not None:
+                if interval <= 0:
+                    msg = f"{name} must be positive, got {interval}"
+                    raise ValueError(msg)
+                setattr(self.grid, name, interval)
+        if half_spacer is not None:
+            self.grid.half_spacer = half_spacer
+        if any(v is not None for v in (major_interval, minor_interval, half_spacer)):
+            self.grid.redraw()
         self.grid.show()
 
     def clear(self, keep_observers: bool = False) -> None:
@@ -325,8 +346,7 @@ class PanelAxes(Axes):
         method = locations.resolve_method(method)
         rect = (0, 0, 1, 1)  # dummy rect
         super().__init__(fig, rect, **kwargs)
-        fig.add_axes(self)  # apparently this isn't in the super or something
-        # TODO: test this behaves as expected
+        fig.add_axes(self)  # the Axes constructor does not add itself to the figure
         self.panellabel = None
         if panellabel is not None:
             self.add_label(panellabel)
@@ -377,7 +397,6 @@ class PanelAxes(Axes):
             unpacks like a tuple and its fields are also available by name.
 
         """
-        # TODO: use self.get_figure().transCM?
         figsize = locations.inch_to_cm(self._fig.get_size_inches())
         bbox_pos = self.get_position().get_points()
         xmin, ymax = bbox_pos[0]
@@ -592,9 +611,20 @@ class FigureText:
             The figure to add the text to.
         **kwargs
             Keyword arguments for [`matplotlib.figure.Figure.text`][matplotlib.figure.Figure.text].
+            Font size, style and weight default to the "figuretext.fontsize",
+            "figuretext.fontstyle" and "figuretext.fontweight" style parameters.
 
         """
         x, y = locations.cm_to_fraction(figure, (x, y))
+        # style parameters are defaults: anything given explicitly (or by its alias,
+        # for example ``size`` for ``fontsize``) wins
+        for name, aliases in (
+            ("fontsize", ("fontsize", "size")),
+            ("fontstyle", ("fontstyle", "style")),
+            ("fontweight", ("fontweight", "weight")),
+        ):
+            if not any(alias in kwargs for alias in aliases):
+                kwargs[name] = style.params[f"figuretext.{name}"]
         self.text = figure.text(
             x,
             y,

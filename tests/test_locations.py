@@ -119,3 +119,15 @@ class TestLocationCmToPosition:
     def test_misordered_corners_raise(self, fig, corners):
         with pytest.raises(ValueError, match="less than"):
             locationcm_to_position(fig, corners)
+
+
+class TestPrecision:
+    @pytest.mark.parametrize("value", [0.5, 1, 2.54, 7.3, 13.123456789, 100])
+    def test_cm_inch_round_trip_is_exact_to_float_noise(self, value):
+        assert inch_to_cm(cm_to_inch(value)) == pytest.approx(value, abs=1e-12)
+        assert cm_to_inch(inch_to_cm(value)) == pytest.approx(value, abs=1e-12)
+
+    def test_cm_fraction_round_trip_is_exact_to_float_noise(self, fig):
+        for xy in [(0.5, 0.5), (3.3, 4.7), (15.0, 10.0)]:
+            back = fraction_to_cm(fig, cm_to_fraction(fig, xy))
+            assert back == pytest.approx(xy, abs=1e-12)

@@ -88,6 +88,25 @@ class TestGridDrawing:
         grid.remove()
         assert grid.ax is None
 
+    def test_remove_takes_the_axes_out_of_the_figure(self, scifig, grid):
+        grid.show()
+        grid.remove()
+        assert scifig.axes == []
+
+    def test_markers_are_forgotten_on_remove(self, grid):
+        grid.show()
+        grid.remove()
+        assert grid.major_scatter is None
+        assert grid.minor_scatter is None
+        assert grid.half_scatter is None
+
+    def test_showing_again_after_remove_does_not_leak_axes(self, scifig, grid):
+        for _ in range(3):
+            grid.show()
+            grid.remove()
+        grid.show()
+        assert len(scifig.axes) == 1
+
 
 class TestGridParameters:
     def test_changed_intervals_apply_on_redraw(self, grid):
@@ -136,11 +155,53 @@ class TestSciFigureGridIntegration:
         scifig.draw_grid()
         assert len(scifig.axes) == count
 
-    def test_draw_grid_with_settings_warns_not_implemented(self, scifig, capsys):
-        with pytest.warns(UserWarning, match="not implemented") as record:
-            scifig.draw_grid(major_interval=2)
-        assert record[0].filename == __file__
-        assert capsys.readouterr().out == ""
+    def test_draw_grid_settings_are_applied(self, scifig):
+        scifig.draw_grid(major_interval=2, minor_interval=0.5, half_spacer=False)
+        grid = scifig.grid
+        assert (grid.major_interval, grid.minor_interval) == (2, 0.5)
+        assert grid.half_spacer is False
+        assert grid.half_scatter is None
+        assert grid.major_scatter is not None
+        offsets = grid.major_scatter.get_offsets()
+        assert sorted({float(x) for x, _ in offsets}) == [0, 2, 4, 6, 8, 10, 12]
+
+    def test_draw_grid_settings_are_kept_for_next_time(self, scifig):
+        scifig.draw_grid(major_interval=2)
+        scifig.draw_grid()
+        assert scifig.grid.major_interval == 2
+
+    def test_draw_grid_changing_settings_does_not_add_axes(self, scifig):
+        scifig.draw_grid()
+        count = len(scifig.axes)
+        scifig.draw_grid(major_interval=2)
+        assert len(scifig.axes) == count
+
+    @pytest.mark.parametrize("name", ["major_interval", "minor_interval"])
+    @pytest.mark.parametrize("value", [0, -1])
+    def test_draw_grid_intervals_must_be_positive(self, scifig, name, value):
+        with pytest.raises(ValueError, match="must be positive"):
+            scifig.draw_grid(**{name: value})
+
+    def test_draw_grid_rejects_unknown_settings(self, scifig):
+        with pytest.raises(TypeError):
+            scifig.draw_grid(colour="red")  # pyright: ignore[reportCallIssue]
+
+    def test_resizing_redraws_a_shown_grid(self, scifig):
+        scifig.draw_grid()
+        scifig.set_size_cm(20, 8)
+        assert scifig.grid.ax is not None
+        assert scifig.grid.ax.get_xlim() == pytest.approx((0, 20))
+
+    def test_resizing_keeps_a_hidden_grid_hidden(self, scifig):
+        scifig.draw_grid()
+        scifig.grid.hide()
+        scifig.set_size_cm(20, 8)
+        assert scifig.grid.ax is not None
+        assert not scifig.grid.ax.get_visible()
+
+    def test_resizing_without_a_grid_does_not_create_one(self, scifig):
+        scifig.set_size_cm(20, 8)
+        assert scifig.grid.ax is None
 
     def test_clear_detaches_grid(self, scifig):
         scifig.draw_grid()
