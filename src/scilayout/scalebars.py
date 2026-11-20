@@ -12,6 +12,8 @@ from . import style
 from ._utils import find_stack_level
 from .classes import PanelAxes
 
+__all__ = ["LinkedScaleBar", "ScaleBar"]
+
 
 def _check_coord_system(coord_system: str) -> None:
     """Raise ValueError if the coordinate system is not recognised."""

@@ -19,6 +19,8 @@ from ._utils import find_stack_level
 from .grid import GuideGridClass
 from .types import ExtentCM, centimetres
 
+__all__ = ["FigureText", "LocationCM", "PanelAxes", "PanelLabel", "SciFigure"]
+
 LocationCM = tuple[centimetres, centimetres, centimetres, centimetres]
 """Location in cm (x0, y0, x1, y1) or (x, y, w, h), origin upper left."""
 

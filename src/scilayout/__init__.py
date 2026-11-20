@@ -3,34 +3,60 @@
 This package provides tools for creating and managing scientific figures with a focus on
 layout in centimeters and an upper-left origin. It includes classes for figures, axes,
 text, and scalebars.
+
+Public API
+----------
+``scilayout.figure()`` creates a figure. The main classes are available directly from
+the package (``SciFigure``, ``PanelAxes``, ``PanelLabel``, ``FigureText``,
+``ScaleBar``, ``LinkedScaleBar`` and ``StatsLine``) and in these modules:
+
+- ``classes``: figure, panel, panel label and figure text
+- ``scalebars``: ``ScaleBar`` and ``LinkedScaleBar``
+- ``stats``: ``StatsLine``
+- ``style``: the style parameters (``params``, ``use``, ``reset``)
+- ``locations``: conversions between cm, inches and figure fraction
+- ``types``: ``Extent`` and ``Bound`` and their unit aliases
+
+``base`` and ``grid`` are internal. They stay importable but may change without notice.
+Use ``SciFigure.export`` to save a figure and ``SciFigure.draw_grid`` for the guide grid.
 """
 
-__version__ = "0.1.2"
-__all__ = ["__version__"]
-# Import dependencies
 from typing import Any, cast
 
 import matplotlib.pyplot as plt
 
-# Import sub-modules
 from . import (
-    base,
+    base,  # internal
     classes,
+    grid,  # internal
     locations,
     scalebars,
     stats,
     style,
+    types,
 )
+from .classes import FigureText, PanelAxes, PanelLabel, SciFigure
+from .scalebars import LinkedScaleBar, ScaleBar
+from .stats import StatsLine
 
-# TODO: add sub-modules to __all__ to finalise API
-# __all__ += [
-#     "base",
-#     "classes",
-#     "locations",
-#     "scalebars",
-#     "stats",
-#     "style",
-# ]
+__version__ = "0.1.2"
+__all__ = [
+    "FigureText",
+    "LinkedScaleBar",
+    "PanelAxes",
+    "PanelLabel",
+    "ScaleBar",
+    "SciFigure",
+    "StatsLine",
+    "__version__",
+    "classes",
+    "figure",
+    "locations",
+    "scalebars",
+    "stats",
+    "style",
+    "types",
+]
 
 
 def figure(**kwargs: Any) -> classes.SciFigure:

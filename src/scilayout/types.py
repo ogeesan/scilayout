@@ -3,6 +3,20 @@
 from numbers import Real
 from typing import NamedTuple
 
+__all__ = [
+    "Bound",
+    "BoundCM",
+    "BoundFraction",
+    "BoundInches",
+    "Extent",
+    "ExtentCM",
+    "ExtentFraction",
+    "ExtentInches",
+    "centimetres",
+    "fraction",
+    "inches",
+]
+
 centimetres = float
 """A type alias for centimeters, used for positions and dimensions in figures."""
 inches = float

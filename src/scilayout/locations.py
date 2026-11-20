@@ -13,6 +13,17 @@ from numpy.typing import ArrayLike
 from ._utils import find_stack_level
 from .types import Bound, Extent, ExtentCM, centimetres
 
+__all__ = [
+    "CMTransform",
+    "InvertedCMTransform",
+    "LocationMethod",
+    "cm_to_fraction",
+    "cm_to_inch",
+    "fraction_to_cm",
+    "inch_to_cm",
+    "locationcm_to_position",
+]
+
 LocationMethod = Literal["bounds", "extent"]
 """How to read a 4-tuple location.
 

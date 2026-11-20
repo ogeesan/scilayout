@@ -4,6 +4,8 @@ from matplotlib import transforms
 from matplotlib.axes import Axes
 from matplotlib.transforms import Transform
 
+__all__ = ["StatsLine"]
+
 
 class StatsLine:
     """A horizontal statistical line with vertical drops at each end."""

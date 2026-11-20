@@ -9,6 +9,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+__all__ = ["StyleDictionary", "defaultstyles", "params", "reset", "use"]
+
 # --- Handle styling of scilayout elements
 # This dictionary defines the default styles used across scilayout.
 # These can be overridden by the user by using a configuration file using scilayout.style.use(path/to/json) or by modifying the dictionary directly.
