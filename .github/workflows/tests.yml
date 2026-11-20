@@ -38,6 +38,10 @@ jobs:
         os: [ubuntu-latest]
         python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
         include:
+          # the one cell that measures coverage and uploads it
+          - os: ubuntu-latest
+            python-version: "3.13"
+            coverage: true
           # one version on the other platforms
           - os: macos-latest
             python-version: "3.13"
@@ -50,12 +54,18 @@ jobs:
       - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           enable-cache: true
+          # Only main saves the uv cache, pull requests just read it
+          save-cache: ${{ github.ref == 'refs/heads/main' }}
           python-version: ${{ matrix.python-version }}
       - run: uv sync --locked
+      - name: Run tests
+        if: ${{ !matrix.coverage }}
+        run: uv run pytest
       - name: Run tests with coverage
+        if: ${{ matrix.coverage }}
         run: uv run pytest --cov=scilayout --cov-report=xml
       - name: Upload coverage to Coveralls
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.13'
+        if: ${{ matrix.coverage }}
         uses: coverallsapp/github-action@8d6379e14d29928660c4ba802d8e85393440b329 # v2.3.8
         with:
           file: coverage.xml
