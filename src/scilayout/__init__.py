@@ -62,23 +62,32 @@ __all__ = [
 def figure(**kwargs: Any) -> classes.SciFigure:
     """Create a SciFigure object.
 
-    This function is wraps plt.figure()
-    Please see https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.figure.html
-    for documentation about figure arguments and keyword arguments.
+    This function wraps ``plt.figure()``. See
+    https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.figure.html
+    for the figure arguments.
 
-    Example usage:
+    Parameters
+    ----------
+    **kwargs
+        Keyword arguments for :func:`matplotlib.pyplot.figure`, for example
+        ``figsize`` or ``num``. ``FigureClass`` cannot be set.
 
-    ```python
-    %matplotlib
-    import scilayout
-    fig = scilayout.figure()
-    ax_1 = fig.add_panel((1, 2, 4, 5), method="bounds")
-    ax_1
-    ```
-    :param name: Name of the figure
-    :type name: str, optional
-    :return: SciFigure object (the plot window)
-    :rtype: scilayout.figures.SciFigure
+    Returns
+    -------
+    SciFigure
+        The new figure (the plot window).
+
+    Raises
+    ------
+    ValueError
+        If ``FigureClass`` is given.
+
+    Examples
+    --------
+    >>> import scilayout
+    >>> fig = scilayout.figure()
+    >>> ax_1 = fig.add_panel((1, 2, 4, 5), method="bounds")
+
     """
     if "FigureClass" in kwargs:
         msg = "Cannot set FigureClass in scilayout.figure(), use scilayout.classes.SciFigure instead."

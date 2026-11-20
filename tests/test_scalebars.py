@@ -78,6 +78,10 @@ class TestScaleBarText:
         bar = ScaleBar(panel, (3, 4), 2, unit="mm", coordSystem="data")
         assert bar.text.get_text() == "2 mm"
 
+    def test_default_text_without_a_unit_is_just_the_length(self, panel):
+        bar = ScaleBar(panel, (3, 4), 2, coordSystem="data")
+        assert bar.text.get_text() == "2"
+
     def test_custom_text(self, panel):
         bar = ScaleBar(panel, (3, 4), 2, textstring="two", coordSystem="data")
         assert bar.text.get_text() == "two"

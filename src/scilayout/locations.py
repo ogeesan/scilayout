@@ -51,6 +51,11 @@ def resolve_method(method: str | None) -> LocationMethod:
     LocationMethod
         ``"bounds"`` or ``"extent"``.
 
+    Raises
+    ------
+    ValueError
+        If ``method`` is not recognised.
+
     """
     if method is None:
         warnings.warn(
@@ -94,6 +99,12 @@ def to_extent(location: tuple[float, ...], method: LocationMethod) -> ExtentCM:
     ExtentCM
         Corners (x0, y0, x1, y1) in cm.
 
+    Raises
+    ------
+    ValueError
+        If ``location`` does not have four values, the extent is not ordered, or a
+        width or height is negative.
+
     """
     if isinstance(location, Extent):
         return location
@@ -113,14 +124,28 @@ def locationcm_to_position(
     fig: matplotlib.figure.Figure,
     location_corners: tuple[centimetres, centimetres, centimetres, centimetres],
 ) -> tuple[float, float, float, float]:
-    """Convert an upper left origin cm extent to figure fraction rect.
+    """Convert an upper left origin cm extent to a figure fraction rect.
 
-    :param fig: Figure window to find true size from
-    :type fig: matplotlib.figure.Figure
-    :param location_corners: (x1, y1, x2, y2), origin point is upper left of figure (y1 is visual up), cm units
-    :type location_corners: Tuple[float, float, float, float]
-    :return: (x1, y1, width, height), origin point is lower left of figure (y1 is visual down), fraction units
-    :rtype: Tuple[float, float, float, float]
+    Parameters
+    ----------
+    fig : matplotlib.figure.Figure
+        Figure to find the true size from.
+    location_corners : tuple of float
+        (x0, y0, x1, y1) corners in cm, origin at the upper left of the figure with y
+        increasing downwards.
+
+    Returns
+    -------
+    tuple of float
+        (left, bottom, width, height) in figure fraction, origin at the lower left of
+        the figure with y increasing upwards. This is the form matplotlib's
+        ``add_axes`` and ``set_position`` take.
+
+    Raises
+    ------
+    ValueError
+        If ``x0 > x1`` or ``y0 > y1``.
+
     """
     x0_cm, y0_cm, x1_cm, y1_cm = location_corners
     if x0_cm > x1_cm or y0_cm > y1_cm:
@@ -173,14 +198,20 @@ def inch_to_cm(inch: float | np.ndarray) -> float | np.ndarray:
 def cm_to_fraction(
     fig: matplotlib.figure.Figure, xy: tuple[float, float]
 ) -> tuple[float, float]:
-    """Convert upper left cm to standard axes fraction.
+    """Convert a position in cm from the upper left to figure fraction.
 
-    :param fig:
-    :type fig: matplotlib.figures.Figure
-    :param xy: (x, y) origin upper left
-    :type xy: Tuple[float, float]
-    :return: xfrac, yfrac, origin lower left
-    :rtype: Tuple[float, float]
+    Parameters
+    ----------
+    fig : matplotlib.figure.Figure
+        Figure to find the size from.
+    xy : tuple of float
+        (x, y) in cm, origin at the upper left of the figure.
+
+    Returns
+    -------
+    tuple of float
+        (x, y) in figure fraction, origin at the lower left of the figure.
+
     """
     figsize = inch_to_cm(fig.get_size_inches())
     width = xy[0]
@@ -191,14 +222,20 @@ def cm_to_fraction(
 def fraction_to_cm(
     fig: matplotlib.figure.Figure, xy: tuple[float, float]
 ) -> tuple[centimetres, centimetres]:
-    """Convert standard axes fraction to upper left cm.
+    """Convert a figure fraction position to cm from the upper left.
 
-    :param fig:
-    :type fig: matplotlib.figures.Figure
-    :param xy: (x, y) axes fraction origin lower left
-    :type xy: Tuple[float, float]
-    :return: (x, y) cm origin upper left
-    :rtype: Tuple[float, float]
+    Parameters
+    ----------
+    fig : matplotlib.figure.Figure
+        Figure to find the size from.
+    xy : tuple of float
+        (x, y) in figure fraction, origin at the lower left of the figure.
+
+    Returns
+    -------
+    tuple of float
+        (x, y) in cm, origin at the upper left of the figure.
+
     """
     figsize = inch_to_cm(fig.get_size_inches())
     return xy[0] * figsize[0], figsize[1] - (figsize[1] * xy[1])
@@ -218,8 +255,11 @@ class CMTransform(Transform):
     def __init__(self, fig: matplotlib.figure.Figure) -> None:
         """Initialize the CMTransform.
 
-        :param fig: The figure to calculate the transform on.
-        :type fig: matplotlib.figure.Figure
+        Parameters
+        ----------
+        fig : matplotlib.figure.Figure
+            The figure to calculate the transform on.
+
         """
         super().__init__()
         self.fig = fig

@@ -50,8 +50,16 @@ def _open_gap(
 class ScaleBar:
     """Scale bar for matplotlib plots.
 
-    Both horizontal and vertical scale bars.
-    A scalebar that can be respositioned using the move() method.
+    Horizontal or vertical, with text that can sit beside the bar or in a break in it.
+    A scalebar can be repositioned using the :meth:`move` method.
+
+    Attributes
+    ----------
+    line : matplotlib.lines.Line2D
+        The bar.
+    text : matplotlib.text.Text
+        The label.
+
     """
 
     line: Line2D
@@ -74,32 +82,55 @@ class ScaleBar:
     ) -> None:
         """Create a scalebar on a matplotlib axes.
 
-        :param ax: Axes to draw the scalebar on
-        :type ax: matplotlib.axes.Axes
-        :param length: Length of the scalebar
-        :type length: float or int
-        :param xy: Position of the scalebar in data coordinates
-        :type xy: tuple
-        :param unit: Unit of the scalebar, optional
-        :type unit: str
-        :param orientation: Orientation of the scalebar. 'h' for horizontal (default), 'v' for vertical
-        :type orientation: str, optional
-        :param coordSystem: Units of the xy position. 'fraction' (default), 'data' or 'cm'
-        :type coordSystem: str, optional
-        :param hpos: Horizontal position of the text. Behaviour depends on orientation.
-            For a vertical bar: 'left' (default), 'right' or 'center'. 'center' puts the
-            text in the middle of the bar, with a gap in the bar around the text
-        :type hpos: str
-        :param vpos: Vertical position of the text. Behaviour depends on orientation.
-            For a horizontal bar: 'bottom' (default), 'top' or 'center'. 'center' puts
-            the text in the middle of the bar, with a gap in the bar around the text
-        :type vpos: str
-        :param textstring: Text to display on the scalebar. Defaults to the length and unit
-        :type textstring: str
-        :param lw: Linewidth of the scalebar, default 1
-        :type lw: float
-        :param fontsize: Font size of the text, default 8
-        :type fontsize: int
+        Parameters
+        ----------
+        ax : matplotlib.axes.Axes
+            Axes to draw the scalebar on.
+        xy : tuple of float
+            Position of the start of the scalebar (its left end if horizontal, its
+            lower end if vertical), in units of ``coordSystem``.
+        length : float
+            Length of the scalebar in data units.
+        unit : str, optional
+            Unit of the scalebar, shown after the length in the default text.
+        coordSystem : {"fraction", "data", "cm"}, optional
+            Units of ``xy``: "fraction" of the axes (default), "data" coordinates, or
+            "cm" from the upper left of the figure (needs a ``PanelAxes``).
+        orientation : {"h", "horizontal", "v", "vertical"}, optional
+            Orientation of the scalebar, horizontal by default.
+        hpos : {"left", "center", "right"}, optional
+            Where the text sits horizontally. Only used for a vertical bar, where it is
+            "left" by default. "center" puts the text in the middle of the bar, with a
+            gap in the bar around the text.
+        vpos : {"top", "center", "bottom"}, optional
+            Where the text sits vertically. Only used for a horizontal bar, where it is
+            "bottom" by default. "center" puts the text in the middle of the bar, with
+            a gap in the bar around the text.
+        transform : {"transData", "transAxes"}, optional
+            Transform of the scalebar. Only "transData" is implemented.
+        textstring : str, optional
+            Text to display. Defaults to the length and unit.
+        lw : float, optional
+            Linewidth of the scalebar, 1 by default.
+        fontsize : float, optional
+            Font size of the text. Defaults to the "scalebars.fontsize" style parameter.
+
+        Raises
+        ------
+        ValueError
+            If ``orientation``, ``hpos``, ``vpos``, ``coordSystem`` or ``transform`` is
+            not one of the allowed values.
+        NotImplementedError
+            If ``transform`` is "transAxes".
+        TypeError
+            If ``coordSystem`` is "cm" and ``ax`` is not a ``PanelAxes``.
+
+        Warns
+        -----
+        UserWarning
+            If the text is centred on the bar but is longer than the bar, in which
+            case the bar is not drawn.
+
         """
         # Sort out orientations
         if orientation in ("horizontal", "h"):
@@ -177,9 +208,12 @@ class ScaleBar:
             transform=transform,
             clip_on=False,
         )[0]
-        textstring = (
-            f"{self.length} {self.unit}" if self.textstring is None else self.textstring
-        )
+        if self.textstring is not None:
+            textstring = self.textstring
+        elif self.unit is None:
+            textstring = f"{self.length}"
+        else:
+            textstring = f"{self.length} {self.unit}"
         self.text = self.ax.text(
             text_xpos,
             text_ypos,
@@ -193,12 +227,21 @@ class ScaleBar:
     def move(self, x: float, y: float, coordSystem: str | None = None) -> None:
         """Move the scalebar to a new position.
 
-        :param x: x-coordinate of the new position
-        :type x: float
-        :param y: y-coordinate of the new position
-        :type y: float
-        :param coordSystem: scale type of the new position. Defaults to object's unit type
-        :type coordSystem: str, optional
+        Parameters
+        ----------
+        x : float
+            x-coordinate of the new position.
+        y : float
+            y-coordinate of the new position.
+        coordSystem : {"fraction", "data", "cm"}, optional
+            Units of ``x`` and ``y``. Defaults to the units the scalebar was created
+            with.
+
+        Raises
+        ------
+        ValueError
+            If ``coordSystem`` is not recognised.
+
         """
         coordSystem = self.coordSystem if coordSystem is None else coordSystem
         _check_coord_system(coordSystem)
@@ -265,14 +308,22 @@ class ScaleBar:
     ) -> tuple[list[float], list[float]]:
         """Find the x and y coordinates of the scalebar.
 
-        :param x: x-coordinate of the new position
-        :type x: float
-        :param y: y-coordinate of the new position
-        :type y: float
-        :param coordSystem: scale type of the new position ('fraction', 'data', 'cm')
-        :type coordSystem: str
-        :return: Coordinates of the scalebar in data coordinates
-        :rtype: Tuple(List[float, float], List[float, float])
+        Parameters
+        ----------
+        x : float
+            x-coordinate of the new position.
+        y : float
+            y-coordinate of the new position.
+        coordSystem : {"fraction", "data", "cm"}
+            Units of ``x`` and ``y``.
+
+        Returns
+        -------
+        x_locs : list of float
+            x data coordinates of the two ends of the bar.
+        y_locs : list of float
+            y data coordinates of the two ends of the bar.
+
         """
         if coordSystem == "fraction":
             x, y = self.ax.transAxes.transform((x, y))
@@ -329,7 +380,38 @@ class LinkedScaleBar:
         y_textstring: str | None = None,
         lw: float | None = None,
     ) -> None:
-        """Create linked horizontal and vertical scale bars at the same position."""
+        """Create linked horizontal and vertical scale bars at the same position.
+
+        Parameters
+        ----------
+        ax : matplotlib.axes.Axes
+            Axes to draw the scalebars on.
+        xy : tuple of float
+            Position of the shared corner, in units of ``coordSystem``.
+        x_length : float
+            Length of the horizontal bar in data units.
+        y_length : float
+            Length of the vertical bar in data units.
+        x_unit : str, optional
+            Unit of the horizontal bar.
+        y_unit : str, optional
+            Unit of the vertical bar.
+        coordSystem : {"fraction", "data", "cm"}, optional
+            Units of ``xy``.
+        hat : {"left", "center", "right"}, optional
+            Horizontal position of the vertical bar's text.
+        vat : {"top", "center", "bottom"}, optional
+            Vertical position of the horizontal bar's text.
+        transform : {"transData", "transAxes"}, optional
+            Transform of the scalebars. Only "transData" is implemented.
+        x_textstring : str, optional
+            Text of the horizontal bar. Defaults to its length and unit.
+        y_textstring : str, optional
+            Text of the vertical bar. Defaults to its length and unit.
+        lw : float, optional
+            Linewidth of both bars.
+
+        """
         if vat is None:
             vat = "bottom"
         self.x_scalebar = ScaleBar(
@@ -359,6 +441,17 @@ class LinkedScaleBar:
         self.ax = ax
 
     def move(self, x: float, y: float, coordSystem: str | None = None) -> None:
-        """Move both scale bars to a new position."""
+        """Move both scale bars to a new position.
+
+        Parameters
+        ----------
+        x : float
+            x-coordinate of the shared corner.
+        y : float
+            y-coordinate of the shared corner.
+        coordSystem : {"fraction", "data", "cm"}, optional
+            Units of ``x`` and ``y``. Defaults to the units the bars were created with.
+
+        """
         self.x_scalebar.move(x, y, coordSystem)
         self.y_scalebar.move(x, y, coordSystem)

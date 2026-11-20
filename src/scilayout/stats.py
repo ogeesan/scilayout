@@ -11,16 +11,19 @@ class StatsLine:
     """A horizontal statistical line with vertical drops at each end."""
 
     def __init__(self, ax: Axes, y: float, x0: float, x1: float) -> None:
-        """Horizontal statistical line with vertical line at the end.
+        """Draw a horizontal statistical line with a drop at each end.
 
-        :param ax: Axes to draw the line
-        :type ax: matplotlib.axes.Axes
-        :param y: y location of the line in axis proportion
-        :type y: float
-        :param x0: x location of the start of the line in data coordinates
-        :type x0: float
-        :param x1: x location of the end of the line in data coordinates
-        :type x1: float
+        Parameters
+        ----------
+        ax : matplotlib.axes.Axes
+            Axes to draw the line on.
+        y : float
+            y location of the line as a fraction of the axes height.
+        x0 : float
+            x location of the start of the line in data coordinates.
+        x1 : float
+            x location of the end of the line in data coordinates.
+
         """
         self.ax = ax
         self.y = y
@@ -75,14 +78,20 @@ class StatsLine:
     def set_transform(self, x: str = "data", y: str = "axes") -> None:
         """Set the transform for the stat bar.
 
-        Transform type can be 'data' or 'axes'.
-        - 'data' will set the transform to the data coordinates of the axis.
-        - 'axes' will set the transform to the proportion of the axis. Resizing the axis will not affect the position of the line
+        Parameters
+        ----------
+        x : {"data", "axes"}
+            Coordinates ``x0`` and ``x1`` are given in. "data" is the data coordinates
+            of the axis, "axes" is the proportion of the axis width.
+        y : {"data", "axes"}
+            Coordinates ``y`` is given in. "axes" is the proportion of the axis height,
+            so resizing the axis does not change where the line sits relative to it.
 
-        :param x: x transform type
-        :type x: str
-        :param y: y transform type
-        :type y: str
+        Raises
+        ------
+        ValueError
+            If ``x`` or ``y`` is not "data" or "axes".
+
         """
         transform: dict[str, Transform] = {}
         for key, val in zip(["x", "y"], [x, y], strict=True):

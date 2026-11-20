@@ -21,6 +21,23 @@ class TestParams:
         style.params._setitem_bypass("simple", 3)
         assert style.params.simple == 3  # pyright: ignore[reportAttributeAccessIssue]
 
+    def test_missing_attribute_raises_attribute_error(self):
+        with pytest.raises(AttributeError, match="nope"):
+            style.params.nope  # noqa: B018  # pyright: ignore[reportAttributeAccessIssue]
+
+    def test_hasattr_and_getattr_default_work(self):
+        # these rely on AttributeError, not KeyError
+        assert not hasattr(style.params, "nope")
+        assert getattr(style.params, "nope", "default") == "default"
+
+    def test_can_be_copied_and_pickled(self):
+        import copy
+        import pickle
+
+        copied = copy.deepcopy(style.params)
+        assert dict(copied) == dict(style.params)
+        assert dict(pickle.loads(pickle.dumps(style.params))) == dict(style.params)
+
     def test_bypass_allows_new_keys(self):
         style.params._setitem_bypass("new.key", 1)
         assert style.params["new.key"] == 1

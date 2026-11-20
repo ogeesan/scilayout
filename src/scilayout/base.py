@@ -77,20 +77,32 @@ def create_panel_locations(
 ) -> np.ndarray:
     """Find locations of panels.
 
-    :param x1: Left x location
-    :type x1: float
-    :param y1: Top y location
-    :type y1: float
-    :param x2: Right x location
-    :type x2: float
-    :param y2: Bottom y location
-    :type y2: float
-    :param npanels: Number of divisions
-    :type npanels: Tuple[int, int]
-    :param pad: padding between each
-    :type pad: float
-    :return: Array containing coordinates for each panel
-    :rtype: numpy.typing.ndarray
+    Parameters
+    ----------
+    x1 : float
+        Left x location.
+    y1 : float
+        Top y location.
+    x2 : float
+        Right x location.
+    y2 : float
+        Bottom y location.
+    npanels : tuple of int
+        Number of panels as (rows, columns).
+    pad : float
+        Padding between panels.
+
+    Returns
+    -------
+    numpy.ndarray
+        Array of shape (rows, columns, 4) holding the (x0, y0, x1, y1) extent of each
+        panel.
+
+    Raises
+    ------
+    ValueError
+        If the number of rows or columns is not positive.
+
     """
     if not (npanels[0] > 0 and npanels[1] > 0):
         msg = "panels must be positive integers"

@@ -1,4 +1,11 @@
-"""Type definitions for scilayout."""
+"""Types for locations on a figure.
+
+Rectangles are described either by their corners, an :class:`Extent`
+(``x0, y0, x1, y1``), or by their origin and size, a :class:`Bound`
+(``x, y, w, h``). The ``...CM``, ``...Inches`` and ``...Fraction`` names are aliases that
+say which unit is meant. They are the same classes, so the unit is documentation only.
+For cm the origin is the upper left of the figure.
+"""
 
 from numbers import Real
 from typing import NamedTuple
@@ -35,14 +42,50 @@ class _ExtentFields(NamedTuple):
 class Extent(_ExtentFields):
     """Extent of a rectangle given by its corners (x0, y0, x1, y1).
 
-    Validated on creation: all values must be real numbers and ``x0 <= x1`` and
-    ``y0 <= y1``. Behaves as an immutable 4-tuple with named fields.
+    An immutable 4-tuple with named fields, checked on creation: all values must be
+    real numbers, ``x0 <= x1`` and ``y0 <= y1``. Note that ``_replace`` does not
+    repeat the checks.
+
+    Attributes
+    ----------
+    x0, y0 : float
+        One corner (the upper left, for locations in cm).
+    x1, y1 : float
+        The opposite corner.
+
+    Examples
+    --------
+    >>> extent = Extent(1, 2, 5, 6)
+    >>> extent.x1
+    5
+    >>> x0, y0, x1, y1 = extent
+    >>> Extent(5, 0, 1, 1)
+    Traceback (most recent call last):
+        ...
+    ValueError: Coordinates must be in the order: (x0, y0, x1, y1).
+
     """
 
     __slots__ = ()
 
     def __new__(cls, x0: float, y0: float, x1: float, y1: float) -> "Extent":
-        """Create an Extent, checking the coordinates are numeric and ordered."""
+        """Create an Extent, checking the coordinates are numeric and ordered.
+
+        Parameters
+        ----------
+        x0, y0 : float
+            One corner.
+        x1, y1 : float
+            The opposite corner.
+
+        Raises
+        ------
+        TypeError
+            If a coordinate is not a real number.
+        ValueError
+            If ``x0 > x1`` or ``y0 > y1``.
+
+        """
         if not all(isinstance(c, Real) for c in (x0, y0, x1, y1)):
             msg = "Coordinates must be numeric (int or float)."
             raise TypeError(msg)
@@ -53,7 +96,25 @@ class Extent(_ExtentFields):
 
 
 class Bound(NamedTuple):
-    """A named tuple to hold bounding box (width, height) coordinates."""
+    """Rectangle given by its origin and size (x, y, w, h).
+
+    An immutable 4-tuple with named fields. Unlike :class:`Extent` it is not checked
+    on creation.
+
+    Attributes
+    ----------
+    x, y : float
+        The origin (the upper left, for locations in cm).
+    w, h : float
+        Width and height.
+
+    Examples
+    --------
+    >>> bound = Bound(1, 2, 4, 4)
+    >>> bound.w
+    4
+
+    """
 
     x: float
     y: float

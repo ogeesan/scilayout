@@ -1,8 +1,37 @@
-"""Define the parameters for the layout of scientific plots.
+"""Style parameters for the elements scilayout draws.
 
-```scilayout.params['panellabel.font'] = 'sans-serif'```
+``scilayout.style.params`` holds the defaults for things like panel labels and
+scalebars. Change a parameter directly, or load several from a JSON file with
+:func:`use`; both affect elements created afterwards. Setting an option when creating an
+element (for example ``fontsize`` on a ``ScaleBar``) overrides the parameter for that
+element only. :func:`reset` restores the defaults.
 
+Examples
+--------
+>>> import scilayout
+>>> scilayout.style.params["panellabel.fontsize"] = 10
+>>> scilayout.style.params["panellabel.fontsize"]
+10
+>>> scilayout.style.reset()
 
+Notes
+-----
+Parameters that are applied today:
+
+==========================  ===================================================
+``panellabel.case``         None keeps the text, "upper" or "lower" changes it
+``panellabel.font``         font family of panel labels
+``panellabel.fontsize``     font size of panel labels (pt)
+``panellabel.fontweight``   font weight of panel labels
+``panellabel.xoffset``      label offset to the right of the panel corner (cm)
+``panellabel.yoffset``      label offset below the panel corner (cm)
+``scalebars.fontsize``      default font size of scalebar text (pt)
+==========================  ===================================================
+
+Defined but not applied yet (setting them has no effect): ``panellabel.fontstyle``,
+``figuretext.fontsize``, ``figuretext.fontstyle``, ``figuretext.fontweight``,
+``scalebars.linewidth``, ``stats.linecolor``, ``stats.linewidth`` and
+``stats.drop_amount``.
 """
 
 import json
@@ -38,7 +67,13 @@ defaultstyles = {
 
 
 class StyleDictionary(dict):
-    """A dictionary that allows access to keys as attributes."""
+    """A dictionary of style parameters that only accepts the keys it already has.
+
+    Keys are strings like ``"panellabel.fontsize"``. Reading works like a normal
+    dictionary, and ``params.key`` also works for keys that are valid Python names.
+    Setting an unknown key raises an error, which catches typos.
+
+    """
 
     # This is like matplotlib.rcParams but not so complicated (and validated) that it does your head in
 
@@ -46,19 +81,81 @@ class StyleDictionary(dict):
         super().__init__(defaultstyles.copy())
 
     def __setitem__(self, name: str, value: Any) -> None:
-        """Set an existing parameter, rejecting unknown keys."""
+        """Set an existing parameter, rejecting unknown keys.
+
+        Parameters
+        ----------
+        name : str
+            The parameter to set.
+        value : Any
+            Its new value.
+
+        Raises
+        ------
+        ValueError
+            If ``name`` is not an existing parameter.
+
+        """
         # Validate the key
         if name not in self.keys():
             raise ValueError(f"Invalid key: {name}. Can only set existing keys.")
         super().__setitem__(name, value)
 
+    def __reduce__(self) -> tuple[Any, tuple[dict[str, Any]]]:
+        """Support ``copy`` and ``pickle``, which can't rebuild the usual way.
+
+        The default rebuilds a dictionary by setting each key on an empty one, which
+        this class rejects because it only accepts keys it already has.
+        """
+        return _restore_style_dictionary, (dict(self),)
+
     def _setitem_bypass(self, name: str, value: Any) -> None:
-        """Bypass the validation for setting the dictionary directly."""
+        """Set a parameter without checking that the key exists.
+
+        Parameters
+        ----------
+        name : str
+            The parameter to set.
+        value : Any
+            Its value.
+
+        """
         super().__setitem__(name, value)
 
     def __getattr__(self, key: str) -> Any:
-        """Access parameters as attributes."""
-        return self[key]
+        """Read a parameter as an attribute.
+
+        Parameters
+        ----------
+        key : str
+            The parameter to read.
+
+        Returns
+        -------
+        Any
+            Its value.
+
+        Raises
+        ------
+        AttributeError
+            If ``key`` is not a parameter. (Not a ``KeyError``: Python's
+            ``hasattr``, ``getattr`` with a default, ``copy`` and ``inspect`` rely on
+            attribute errors.)
+
+        """
+        try:
+            return self[key]
+        except KeyError:
+            msg = f"{type(self).__name__!r} object has no parameter {key!r}"
+            raise AttributeError(msg) from None
+
+
+def _restore_style_dictionary(items: dict[str, Any]) -> StyleDictionary:
+    """Rebuild a StyleDictionary with exactly ``items`` (used by copy and pickle)."""
+    restored = StyleDictionary()
+    dict.clear(restored)
+    dict.update(restored, items)
+    return restored
 
 
 params = StyleDictionary()
@@ -69,10 +166,16 @@ params = StyleDictionary()
 def _load_config(filepath: str | Path) -> dict[str, Any]:
     """Load a configuration file to set parameters.
 
-    :param filepath: Path to the json configuration file
-    :type filepath: str
-    :return: Dictionary of parameters
-    :rtype: dict.
+    Parameters
+    ----------
+    filepath : str or pathlib.Path
+        Path to the JSON configuration file.
+
+    Returns
+    -------
+    dict
+        The parameters in the file.
+
     """
     # Why JSON and not the same format as matplotlib? Because their implementation is too complicated to replicate here.
     # Fight me.
@@ -88,12 +191,21 @@ def use(
 ) -> None:
     """Use a configuration file to set parameters.
 
-    :param filepath: Path to the configuration file
-    :type filepath: str
-    :param params: The dictionary to set the parameters in
-    :type params: dict, optional
-    :param allow_only_valid_keys: Whether to allow only keys that are already in the dictionary
-    :type allow_only_valid_keys: bool, optional
+    Parameters
+    ----------
+    filepath : str or pathlib.Path
+        Path to the JSON configuration file.
+    params : dict, optional
+        The dictionary to set the parameters in. Defaults to ``scilayout.style.params``.
+    allow_only_valid_keys : bool, optional
+        If True (default) raise an error when the file has keys that are not already in
+        ``params``. If False those keys are ignored.
+
+    Raises
+    ------
+    ValueError
+        If ``allow_only_valid_keys`` is True and the file has unknown keys.
+
     """
     config = _load_config(filepath)
 
