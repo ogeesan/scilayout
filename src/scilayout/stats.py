@@ -1,10 +1,14 @@
 """Helper functions and classes for plotting stats information on an axes."""
 
 from matplotlib import transforms
+from matplotlib.axes import Axes
+from matplotlib.transforms import Transform
 
 
 class StatsLine:
-    def __init__(self, ax, y, x0, x1) -> None:
+    """A horizontal statistical line with vertical drops at each end."""
+
+    def __init__(self, ax: Axes, y: float, x0: float, x1: float) -> None:
         """Horizontal statistical line with vertical line at the end.
 
         :param ax: Axes to draw the line
@@ -66,7 +70,7 @@ class StatsLine:
         self.ax.set_xlim(xlim)
         self.ax.set_ylim(ylim)
 
-    def set_transform(self, x="data", y="axes") -> None:
+    def set_transform(self, x: str = "data", y: str = "axes") -> None:
         """Set the transform for the stat bar.
 
         Transform type can be 'data' or 'axes'.
@@ -78,8 +82,8 @@ class StatsLine:
         :param y: y transform type
         :type y: str
         """
-        transform = {"x": None, "y": None}
-        for key, val in zip(["x", "y"], [x, y]):
+        transform: dict[str, Transform] = {}
+        for key, val in zip(["x", "y"], [x, y], strict=True):
             if val == "data":
                 transform[key] = self.ax.transData
             elif val == "axes":

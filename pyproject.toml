@@ -60,6 +60,8 @@ select = [
 ignore = [
     "D203",    # conflicts with D211
     "D213",    # conflicts with D212
+    "ANN401",  # Any is acceptable for style values
+    "E501",    # line length is left to the formatter; long docstring lines are ok
     "RUF013",  # implicit optional
 ]
 
@@ -67,10 +69,16 @@ ignore = [
 convention = "numpy"
 
 [tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]  # re-exports
 "tests/*" = [
     "D",    # docstring
     "ANN",  # type annotations
 ]
+
+[tool.pyright]
+include = ["src", "tests"]
+pythonVersion = "3.10"
+typeCheckingMode = "standard"
 
 [dependency-groups]
 dev = [
@@ -79,6 +87,7 @@ dev = [
     "mkdocs-material>=9.6.20",
     "pyqt5==5.15.11; sys_platform == 'win32'",          # windows compatibility
     "pyqt5-qt5==5.15.2; sys_platform == 'win32'",       # windows compatibility
+    "pyright>=1.1.414",
     "pytest>=8.4.2",
     "pytest-cov>=7.0.0",
     "ruff>=0.17.6",

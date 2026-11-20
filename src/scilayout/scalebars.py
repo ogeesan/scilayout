@@ -1,30 +1,40 @@
 """Movable scalebars for matplotlib plots."""
 
+from typing import Any
+
 import numpy as np
+from matplotlib.axes import Axes
+from matplotlib.lines import Line2D
+from matplotlib.text import Text
 
 from . import style
+from .classes import PanelAxes
 
 
 class ScaleBar:
-    """Scale bar for matplotlib plots
+    """Scale bar for matplotlib plots.
+
     Both horizontal and vertical scale bars.
     A scalebar that can be respositioned using the move() method.
     """
 
+    line: Line2D
+    text: Text
+
     def __init__(
         self,
-        ax,
-        xy,
-        length,
-        unit=None,
-        coordSystem="fraction",
-        orientation="h",
-        hpos=None,
-        vpos=None,
-        transform="transData",
-        textstring=None,
-        lw=None,
-        fontsize=None,
+        ax: Axes,
+        xy: tuple[float, float],
+        length: float,
+        unit: str | None = None,
+        coordSystem: str = "fraction",
+        orientation: str = "h",
+        hpos: str | None = None,
+        vpos: str | None = None,
+        transform: str = "transData",
+        textstring: str | None = None,
+        lw: float | None = None,
+        fontsize: float | None = None,
     ) -> None:
         """Create a scalebar on a matplotlib axes.
 
@@ -76,10 +86,8 @@ class ScaleBar:
         self._transform = transform  # for now this cannot be changed after creation
         self.orientation = orientation
         self.length = length
-        self.line = None
 
         # Text items
-        self.text = None
         self.unit = unit
         self.textstring = textstring
         self.hpos = hpos
@@ -94,7 +102,7 @@ class ScaleBar:
 
         self._initialise_scalebar(*xy)
 
-    def _initialise_scalebar(self, x, y) -> None:
+    def _initialise_scalebar(self, x: float, y: float) -> None:
         """Initialise the scalebar and text objects."""
         if self.orientation == "h":
             if self.vpos == "top":
@@ -103,7 +111,7 @@ class ScaleBar:
                 va = "top"
             else:
                 va = "center"
-            text_kwargs = {"ha": self.hpos, "va": va}
+            text_kwargs: dict[str, Any] = {"ha": self.hpos, "va": va}
         else:
             if self.hpos == "left":
                 ha = "right"
@@ -139,7 +147,7 @@ class ScaleBar:
         )
         self.move(x, y)
 
-    def move(self, x, y, coordSystem=None) -> None:
+    def move(self, x: float, y: float, coordSystem: str | None = None) -> None:
         """Move the scalebar to a new position.
 
         :param x: x-coordinate of the new position
@@ -157,7 +165,7 @@ class ScaleBar:
         x_locs, y_locs = self._find_x_y(x, y, coordSystem)
 
         # Calculate text width in display coordinates
-        renderer = self.ax.get_figure().canvas.get_renderer()
+        renderer = self.ax.get_figure().canvas.get_renderer()  # pyright: ignore[reportOptionalMemberAccess, reportAttributeAccessIssue]
         text_bbox = self.text.get_window_extent(renderer)
         inv_transform = self.ax.transData.inverted()
         text_width_data = (
@@ -200,13 +208,15 @@ class ScaleBar:
         else:
             raise ValueError(f"Unknown orientation: {self.orientation}")
 
-        self.text.set_position((text_xpos, text_ypos))
+        self.text.set_position((float(text_xpos), float(text_ypos)))
         self.line.set_xdata(x_locs)
         self.line.set_ydata(y_locs)
 
         self.ax.figure.canvas.draw()  # to update the display of the modified objects
 
-    def _find_x_y(self, x, y, coordSystem):
+    def _find_x_y(
+        self, x: float, y: float, coordSystem: str
+    ) -> tuple[list[float], list[float]]:
         """Find the x and y coordinates of the scalebar.
 
         :param x: x-coordinate of the new position
@@ -223,6 +233,9 @@ class ScaleBar:
             x, y = self.ax.transData.inverted().transform((x, y))
             print(f"Fractional coordinates: {x}, {y}")
         elif coordSystem == "cm":
+            if not isinstance(self.ax, PanelAxes):
+                msg = "coordSystem 'cm' requires the scalebar axes to be a PanelAxes"
+                raise TypeError(msg)
             x0, y0, x1, y1 = (
                 self.ax.get_location()
             )  # position in cm from top left of figure
@@ -247,28 +260,31 @@ class ScaleBar:
 
     def _update_appearance(self) -> None:
         """Update the appearance of the scalebar."""
-        self.text.set_size(self.fontsize)
+        self.text.set_fontsize(self.fontsize)
         self.line.set_linewidth(self.lw)
         self.ax.figure.canvas.draw()
 
 
 class LinkedScaleBar:
+    """A horizontal and a vertical scale bar that are moved together."""
+
     def __init__(
         self,
-        ax,
-        xy,
-        x_length,
-        y_length,
-        x_unit=None,
-        y_unit=None,
-        coordSystem="fraction",
-        hat=None,
-        vat=None,
-        transform="transData",
-        x_textstring=None,
-        y_textstring=None,
-        lw=None,
+        ax: Axes,
+        xy: tuple[float, float],
+        x_length: float,
+        y_length: float,
+        x_unit: str | None = None,
+        y_unit: str | None = None,
+        coordSystem: str = "fraction",
+        hat: str | None = None,
+        vat: str | None = None,
+        transform: str = "transData",
+        x_textstring: str | None = None,
+        y_textstring: str | None = None,
+        lw: float | None = None,
     ) -> None:
+        """Create linked horizontal and vertical scale bars at the same position."""
         if vat is None:
             vat = "bottom"
         self.x_scalebar = ScaleBar(
@@ -297,6 +313,7 @@ class LinkedScaleBar:
         )
         self.ax = ax
 
-    def move(self, x, y, coordSystem=None) -> None:
+    def move(self, x: float, y: float, coordSystem: str | None = None) -> None:
+        """Move both scale bars to a new position."""
         self.x_scalebar.move(x, y, coordSystem)
         self.y_scalebar.move(x, y, coordSystem)

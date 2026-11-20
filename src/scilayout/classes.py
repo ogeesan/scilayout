@@ -2,17 +2,23 @@
 
 from __future__ import annotations
 
+import contextlib
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import matplotlib as mpl
+import matplotlib.pyplot as plt
 from matplotlib import figure
 from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 from matplotlib.text import Text
 
 from . import base, locations, style
 from .grid import GuideGridClass
-from .types import BoundCM, ExtentCM, centimetres
+from .types import centimetres
+
+LocationCM = tuple[centimetres, centimetres, centimetres, centimetres]
+"""Location in cm (x0, y0, x1, y1) or (x, y, w, h), origin upper left."""
 
 
 # TODO: make docs here the best
@@ -31,8 +37,8 @@ class SciFigure(figure.Figure):
 
     def __init__(
         self,
-        *args: tuple,
-        **kwargs: dict,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         """Initialise a figure with extra scientific-figure ready features.
 
@@ -42,7 +48,6 @@ class SciFigure(figure.Figure):
         # must initialise before super because it'll call clear
         self.grid = GuideGridClass(self)
         super().__init__(*args, **kwargs)
-        self.cm_overlay = None
         self.transCM = locations.CMTransform(self)
 
     def set_size_cm(self, w: float, h: float) -> None:
@@ -59,19 +64,12 @@ class SciFigure(figure.Figure):
         base.set_figure_size_cm(self, w, h)
         # TODO: resize panels to preserve their position
 
-        if self.cm_overlay is not None:
-            # redraw overlay
-            self.remove_overlay()
-            self.add_overlay()
-
     def add_panel(
         self,
-        location: BoundCM
-        | ExtentCM
-        | tuple[centimetres, centimetres, centimetres, centimetres],
-        panellabel: str = None,
+        location: LocationCM,
+        panellabel: str | None = None,
         method: str = "bbox",
-        **kwargs: dict,
+        **kwargs: Any,
     ) -> PanelAxes:
         """Add panel (axes) to the figure.
 
@@ -86,7 +84,7 @@ class SciFigure(figure.Figure):
 
         Parameters
         ----------
-        location : BoundCM | ExtentCM | tuple[float, float, float, float]
+        location : tuple[float, float, float, float]
             Location of the panel in cm (x0, y0, x1, y1). Can be:
             - Bound: (x, y, w, h)
             - Extent: (x0, y0, x1, y1)
@@ -119,7 +117,7 @@ class SciFigure(figure.Figure):
 
     def draw_grid(
         self,
-        **kwargs: dict,
+        **kwargs: Any,
     ) -> None:
         """Add cm grid guide to the figure."""
         if self.grid is None:
@@ -134,23 +132,15 @@ class SciFigure(figure.Figure):
                 )
             self.grid.show()
 
-    def clear(
-        self,
-        **kwargs: dict,
-    ) -> None:
+    def clear(self, keep_observers: bool = False) -> None:
         """Clear the figure (including removal of grid)."""
-        super().clear(**kwargs)
-        self.cm_overlay = None
+        super().clear(keep_observers=keep_observers)
         if self.grid:
             self.grid._detach_ax()
 
-    def clf(
-        self,
-        **kwargs: dict,
-    ) -> None:
+    def clf(self, keep_observers: bool = False) -> None:
         """Clear the figure entirely."""
-        super().clf(**kwargs)
-        self.cm_overlay = None
+        super().clf(keep_observers=keep_observers)
 
     def set_location(
         self,
@@ -170,7 +160,11 @@ class SciFigure(figure.Figure):
         # TODO: add support for other backends
 
         backend = mpl.get_backend()
-        window = self.canvas.manager.window
+        manager = self.canvas.manager
+        if manager is None:
+            msg = "Figure has no window manager (is the backend interactive?)"
+            raise RuntimeError(msg)
+        window = manager.window  # pyright: ignore[reportAttributeAccessIssue]
 
         if method != "px":
             # TODO: add support for method='fraction' and 'cm'?
@@ -184,7 +178,7 @@ class SciFigure(figure.Figure):
             msg = f"Backend {backend} not implemented. Submit issue to add suport."
             raise NotImplementedError(msg)
 
-    def export(self, savepath: Path | str, **kwargs: dict) -> None:
+    def export(self, savepath: Path | str, **kwargs: Any) -> None:
         """Export the figure to a file.
 
         Parameters
@@ -199,7 +193,7 @@ class SciFigure(figure.Figure):
 
     def close(self) -> None:
         """Close figure window (convenience function)."""
-        mpl.pyplot.close(self)
+        plt.close(self)
 
 
 class PanelAxes(Axes):
@@ -208,15 +202,15 @@ class PanelAxes(Axes):
     To use cm 'location' is used instead of 'position' e.g. set_location().
     """
 
-    panellabel: PanelLabel
+    panellabel: PanelLabel | None
 
     def __init__(
         self,
-        fig: mpl.figure.Figure,
-        location: BoundCM | ExtentCM,
-        panellabel: str = None,
+        fig: Figure,
+        location: LocationCM,
+        panellabel: str | None = None,
         method: str = "bbox",
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         rect = (0, 0, 1, 1)  # dummy rect
         super().__init__(fig, rect, **kwargs)
@@ -229,7 +223,7 @@ class PanelAxes(Axes):
 
     def set_location(
         self,
-        location: tuple,
+        location: LocationCM,
         method: str = "bbox",
     ) -> None:
         """Set location of panel in cm.
@@ -256,14 +250,19 @@ class PanelAxes(Axes):
         else:
             msg = 'Method must be either "size" or "bbox"'
             raise ValueError(msg)
-        self.set_position(locations.locationcm_to_position(self.get_figure(), location))
+        self.set_position(locations.locationcm_to_position(self._fig, location))
         if self.panellabel is not None:
             self.panellabel.set_offset(self.panellabel.xoffset, self.panellabel.yoffset)
+
+    @property
+    def _fig(self) -> Figure:
+        """The parent figure."""
+        return cast("Figure", self.get_figure())
 
     def get_location(self) -> tuple:
         """Get location of axes in cm (from top left corner)."""
         # TODO: use self.get_figure().transCM?
-        figsize = locations.inch_to_cm(self.get_figure().get_size_inches())
+        figsize = locations.inch_to_cm(self._fig.get_size_inches())
         bbox_pos = self.get_position().get_points()
         xmin, ymax = bbox_pos[0]
         xmax, ymin = bbox_pos[1]
@@ -280,7 +279,7 @@ class PanelAxes(Axes):
     def add_label(
         self,
         label: str,
-        ha: str = None,
+        ha: str | None = None,
     ) -> None:
         """Add a label to the panel, or set its value.
 
@@ -306,11 +305,9 @@ class PanelAxes(Axes):
         super().clear()
         # check if panellabel is attr
         if "panellabel" in self.__dict__ and self.panellabel is not None:
-            try:
+            # Newer versions of matplotlib do something funky here.
+            with contextlib.suppress(NotImplementedError):
                 self.panellabel.text.remove()
-            except NotImplementedError:
-                # Newer versions of matplotlib do something funky here.
-                pass
             self.panellabel = None
 
 
@@ -352,19 +349,19 @@ class PanelLabel:
     def get_location(self) -> tuple[centimetres, centimetres]:
         """Get position on figure in cm."""
         figfrac = self.text.get_position()
-        return locations.fraction_to_cm(self.ax.get_figure(), figfrac)
+        return locations.fraction_to_cm(self.ax._fig, figfrac)
 
-    def set_location(self, x: float = None, y: float = None) -> None:
+    def set_location(self, x: float | None = None, y: float | None = None) -> None:
         """Set position of label on figure in cm directly."""
         currentpos = self.get_location()
         tempxy = (currentpos[0] if x is None else x, currentpos[1] if y is None else y)
-        convertedfrac = locations.cm_to_fraction(self.ax.get_figure(), tempxy)
+        convertedfrac = locations.cm_to_fraction(self.ax._fig, tempxy)
         setfrac = (convertedfrac[0], convertedfrac[1])
         self.text.set_position(setfrac)
 
     # TODO: add some method for determining position if it's on a plot graph (i.e. label over ylabel position?)
 
-    def set_offset(self, x: float = None, y: float = None) -> None:
+    def set_offset(self, x: float | None = None, y: float | None = None) -> None:
         """Set position of label relative to the upper left corner of the axes.
 
         Parameters
@@ -417,8 +414,8 @@ class FigureText:
         x: centimetres,
         y: centimetres,
         text: str,
-        figure: mpl.figure.Figure,
-        **kwargs: dict[str, Any],
+        figure: Figure,
+        **kwargs: Any,
     ) -> None:
         """Create FigureText object."""
         x, y = locations.cm_to_fraction(figure, (x, y))
@@ -433,7 +430,7 @@ class FigureText:
 
     def set_position(self, x: centimetres, y: centimetres) -> None:
         """Set position of figure text in cm."""
-        x, y = locations.cm_to_fraction(self.text.get_figure(), (x, y))
+        x, y = locations.cm_to_fraction(cast("Figure", self.text.get_figure()), (x, y))
         self.text.set_position((x, y))
 
     def remove(self) -> None:

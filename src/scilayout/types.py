@@ -43,46 +43,15 @@ class Bound(NamedTuple):
     h: float
 
 
-class ExtentCM(Extent):
-    """A named tuple to hold extent (position) coordinates."""
-
-    x0: centimetres
-    y0: centimetres
-    x1: centimetres
-    y1: centimetres
-
-
-class BoundCM(Bound):
-    """A named tuple to hold bounding box (width, height) coordinates."""
-
-    x: centimetres
-    y: centimetres
-    w: centimetres
-    h: centimetres
-
-
-class ExtentInches(Extent):
-    """A named tuple to hold extent (position) coordinates in inches."""
-
-    x0: inches
-    y0: inches
-    x1: inches
-    y1: inches
-
-
-class BoundInches(Bound):
-    """A named tuple to hold bounding box (width, height) coordinates in inches."""
-
-    x: inches
-    y: inches
-    w: inches
-    h: inches
-
-
-class ExtentFraction(Extent):
-    """A named tuple to hold extent (position) coordinates in figure fraction."""
-
-    x0: fraction
-    y0: fraction
-    x1: fraction
-    y1: fraction
+ExtentCM = Extent
+"""Extent (x0, y0, x1, y1) in centimetres from the upper left of the figure."""
+BoundCM = Bound
+"""Bound (x, y, w, h) in centimetres from the upper left of the figure."""
+ExtentInches = Extent
+"""Extent (x0, y0, x1, y1) in inches."""
+BoundInches = Bound
+"""Bound (x, y, w, h) in inches."""
+ExtentFraction = Extent
+"""Extent (x0, y0, x1, y1) in figure fraction."""
+BoundFraction = Bound
+"""Bound (x, y, w, h) in figure fraction."""

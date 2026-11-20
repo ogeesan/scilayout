@@ -6,6 +6,8 @@
 """
 
 import json
+from pathlib import Path
+from typing import Any
 
 # --- Handle styling of scilayout elements
 # This dictionary defines the default styles used across scilayout.
@@ -41,17 +43,19 @@ class StyleDictionary(dict):
     def __init__(self) -> None:
         super().__init__(defaultstyles.copy())
 
-    def __setitem__(self, name, value) -> None:
+    def __setitem__(self, name: str, value: Any) -> None:
+        """Set an existing parameter, rejecting unknown keys."""
         # Validate the key
         if name not in self.keys():
             raise ValueError(f"Invalid key: {name}. Can only set existing keys.")
         super().__setitem__(name, value)
 
-    def _setitem_bypass(self, name, value) -> None:
+    def _setitem_bypass(self, name: str, value: Any) -> None:
         """Bypass the validation for setting the dictionary directly."""
         super().__setitem__(name, value)
 
-    def __getattr__(self, key):
+    def __getattr__(self, key: str) -> Any:
+        """Access parameters as attributes."""
         return self[key]
 
 
@@ -60,8 +64,9 @@ params = StyleDictionary()
 # --- Config file handling ---
 
 
-def _load_config(filepath):
-    """Load a configuration file to set parameters
+def _load_config(filepath: str | Path) -> dict[str, Any]:
+    """Load a configuration file to set parameters.
+
     :param filepath: Path to the json configuration file
     :type filepath: str
     :return: Dictionary of parameters
@@ -69,12 +74,16 @@ def _load_config(filepath):
     """
     # Why JSON and not the same format as matplotlib? Because their implementation is too complicated to replicate here.
     # Fight me.
-    with open(filepath) as f:
+    with Path(filepath).open() as f:
         config = json.load(f)
     return config
 
 
-def use(filepath, params=params, allow_only_valid_keys=True) -> None:
+def use(
+    filepath: str | Path,
+    params: dict[str, Any] = params,
+    allow_only_valid_keys: bool = True,
+) -> None:
     """Use a configuration file to set parameters.
 
     :param filepath: Path to the configuration file

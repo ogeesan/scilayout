@@ -1,18 +1,22 @@
 """Base plotting functions for use in scientific plotting."""
 
 from pathlib import Path
+from typing import cast
 
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.axes import Axes
+from matplotlib.collections import PathCollection
+from matplotlib.figure import Figure
+from matplotlib.text import Text
 
 from . import locations, style
 
 
 def create_panel_label(
-    ax: mpl.axes.Axes,
+    ax: Axes,
     text: str,
-) -> mpl.text.Text:
+) -> Text:
     """Add a panel label in figure fraction coordinates.
 
     Parameters
@@ -51,7 +55,7 @@ def create_panel_label(
         fontweight=style.params["panellabel.fontweight"],
         size=style.params["panellabel.fontsize"],
         label="_nolegend_",  # Don't include in legend
-        transform=ax.get_figure().transFigure,
+        transform=cast("Figure", ax.get_figure()).transFigure,
     )
 
 
@@ -105,8 +109,8 @@ def create_panel_locations(
 
 
 def savefigure(
-    fig: mpl.figure.Figure,
-    fpath: Path,
+    fig: Figure,
+    fpath: Path | str,
     dpi: float = 300.0,
     transparent_png: bool = True,
     bbox: str = "tight",
@@ -176,14 +180,14 @@ def savefigure(
 
 
 def add_cm_overlay_grid(
-    figure: mpl.figure.Figure,
+    figure: Figure,
     width_cm: float | None = None,
     height_cm: float | None = None,
 ) -> tuple[
-    mpl.axes.Axes,
-    mpl.collections.PathCollection,
-    mpl.collections.PathCollection,
-    mpl.collections.PathCollection,
+    Axes,
+    PathCollection,
+    PathCollection,
+    PathCollection,
 ]:
     """Add an overlay to view the cm size of all items on the figure.
 
@@ -204,13 +208,13 @@ def add_cm_overlay_grid(
     """
     # Allow user to specify what the position is meant to be
     # rather than what it actually is
-    width_cm_actual, height_cm_actual = locations.inch_to_cm(figure.get_size_inches())
-    width_cm = width_cm_actual if width_cm is None else width_cm
-    height_cm = height_cm_actual if height_cm is None else height_cm
+    size_cm = locations.inch_to_cm(figure.get_size_inches())
+    width_cm = float(size_cm[0]) if width_cm is None else width_cm
+    height_cm = float(size_cm[1]) if height_cm is None else height_cm
 
     # Create an axes spanning the entire grid
     ax = figure.add_axes(
-        [0, 0, 1, 1],
+        (0, 0, 1, 1),
         label="cm_overlay",
         frameon=False,
     )  # No axis lines
@@ -219,8 +223,8 @@ def add_cm_overlay_grid(
     )  # Make the zoom/panning interactive tool not apply to this axes
 
     # Set limits to match the cm size of the figure
-    ax.set_ylim([0, height_cm])
-    ax.set_xlim([0, width_cm])
+    ax.set_ylim((0, height_cm))
+    ax.set_xlim((0, width_cm))
     ax.invert_yaxis()  # invert y origin to be upper to match the coordinate system
 
     # Generate positions of each cm marker
@@ -252,7 +256,7 @@ def add_cm_overlay_grid(
 
 
 def set_figure_size_cm(
-    fig: mpl.figure.Figure,
+    fig: Figure,
     w: float,
     h: float,
 ) -> None:

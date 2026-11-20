@@ -20,7 +20,7 @@ class GuideGridClass:
 
     """
 
-    ax: Axes
+    ax: Axes | None
     """Axes tied to figure that has its lims sent to figure cm size."""
     # lines : dict[str, dict[float, Line2D]] # TODO: this is broke
 
@@ -56,28 +56,30 @@ class GuideGridClass:
         self.half_scatter = None
         self.ax = None
 
-    def _create_axes(self) -> None:
+    def _create_axes(self) -> Axes:
         """Create an axes for the grid."""
-        self.ax = self.figure.add_axes(
-            [0, 0, 1, 1],  # Full figure size
+        ax = self.figure.add_axes(
+            (0, 0, 1, 1),  # Full figure size
             label="GuideGrid",
             frameon=False,
         )
-        self.ax.set_navigate(False)
+        ax.set_navigate(False)
+        return ax
 
     def redraw(self) -> None:
         """Clear and draw the grid."""
         # TODO: check what happens after self.remove() is called
 
         if self.ax is None:
-            self._create_axes()
+            self.ax = self._create_axes()
         else:
             self.ax.clear()
+        ax = self.ax
 
         # Set limits to match the cm size of the figure
         width_cm, height_cm = locations.inch_to_cm(self.figure.get_size_inches())
-        self.ax.set_ylim([height_cm, 0])
-        self.ax.set_xlim([0, width_cm])
+        ax.set_ylim((height_cm, 0))
+        ax.set_xlim((0, width_cm))
 
         # TODO: handle major, minor, and the half-minor markers
         #       Do I lock users in to 1cm grid or allow them to set the grid size?
@@ -88,7 +90,7 @@ class GuideGridClass:
         # Create 1cm mesh grid, make the 1cm markers and smaller 0.5 cm markers
         mesh = np.meshgrid(xlocs, ylocs)
         # Plot 1cm markers
-        self.minor_scatter = self.ax.scatter(
+        self.minor_scatter = ax.scatter(
             mesh[0],
             mesh[1],
             alpha=0.3,
@@ -100,7 +102,7 @@ class GuideGridClass:
         # Plot half_spacer
         if self.half_spacer:
             half_value = self.minor_interval / 2
-            self.half_scatter = self.ax.scatter(
+            self.half_scatter = ax.scatter(
                 mesh[0] + half_value,
                 mesh[1] + half_value,
                 marker="x",
@@ -116,7 +118,7 @@ class GuideGridClass:
         xlocs = np.arange(0, width_cm + 1, self.major_interval)
         ylocs = np.arange(0, height_cm + 1, self.major_interval)
         meshmajor = np.meshgrid(xlocs, ylocs)
-        self.major_scatter = self.ax.scatter(
+        self.major_scatter = ax.scatter(
             meshmajor[0],
             meshmajor[1],
             color="k",
@@ -129,9 +131,9 @@ class GuideGridClass:
         for axis in ["x", "y"]:
             for location in self.lines[axis]:
                 if axis == "x":
-                    self.ax.axvline(location, **self.lines[axis][location])
+                    ax.axvline(location, **self.lines[axis][location])
                 else:
-                    self.ax.axhline(location, **self.lines[axis][location])
+                    ax.axhline(location, **self.lines[axis][location])
 
     def add_line(self, axis: str, location: float) -> None:
         """Add a line to the grid.
@@ -178,12 +180,14 @@ class GuideGridClass:
 
     def hide(self) -> None:
         """Hide the grid."""
-        self.ax.set_visible(False)
+        if self.ax is not None:
+            self.ax.set_visible(False)
         self.figure.canvas.draw()
 
     def show(self) -> None:
         """Show the grid."""
         if self.ax is None:
             self.redraw()
-        self.ax.set_visible(True)
+        if self.ax is not None:
+            self.ax.set_visible(True)
         self.figure.canvas.draw()

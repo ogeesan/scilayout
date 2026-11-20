@@ -2,26 +2,28 @@
 
 from __future__ import annotations
 
+from typing import Any, overload
+
 import matplotlib.figure
 import numpy as np
 from matplotlib.transforms import Transform
+from numpy.typing import ArrayLike
 
-from .types import ExtentCM, ExtentInches, centimetres, inches
+from .types import centimetres
 
 
 def locationcm_to_position(
     fig: matplotlib.figure.Figure,
-    location_corners: ExtentCM
-    | tuple[centimetres, centimetres, centimetres, centimetres],
-) -> ExtentInches:
+    location_corners: tuple[centimetres, centimetres, centimetres, centimetres],
+) -> tuple[float, float, float, float]:
     """Convert an upper left origin cm extent to figure fraction rect.
 
     :param fig: Figure window to find true size from
     :type fig: matplotlib.figure.Figure
     :param location_corners: (x1, y1, x2, y2), origin point is upper left of figure (y1 is visual up), cm units
-    :type location_corners: ExtentCM (Tuple[float, float, float, float])
+    :type location_corners: Tuple[float, float, float, float]
     :return: (x1, y1, width, height), origin point is lower left of figure (y1 is visual down), fraction units
-    :rtype: ExtentInches (Tuple[float, float, float, float])
+    :rtype: Tuple[float, float, float, float]
     """
     x0_cm, y0_cm, x1_cm, y1_cm = location_corners
     if x0_cm > x1_cm or y0_cm > y1_cm:
@@ -43,22 +45,37 @@ def locationcm_to_position(
     height_figure = top - bottom
 
     # Convert into position
-    return (left, bottom, width_figure, height_figure)
+    return (
+        float(left),
+        float(bottom),
+        float(width_figure),
+        float(height_figure),
+    )
 
 
 # TODO: check precision conversions of integer
 # setting to location .5 and back again gives a slight difference
-def cm_to_inch(cm: centimetres) -> inches:
+@overload
+def cm_to_inch(cm: float) -> float: ...
+@overload
+def cm_to_inch(cm: np.ndarray) -> np.ndarray: ...
+def cm_to_inch(cm: float | np.ndarray) -> float | np.ndarray:
     """Convert centimeters to inches."""
     return cm / 2.54
 
 
-def inch_to_cm(inch: inches) -> centimetres:
+@overload
+def inch_to_cm(inch: float) -> float: ...
+@overload
+def inch_to_cm(inch: np.ndarray) -> np.ndarray: ...
+def inch_to_cm(inch: float | np.ndarray) -> float | np.ndarray:
     """Convert inches to centimeters."""
     return inch * 2.54
 
 
-def cm_to_fraction(fig, xy):
+def cm_to_fraction(
+    fig: matplotlib.figure.Figure, xy: tuple[float, float]
+) -> tuple[float, float]:
     """Convert upper left cm to standard axes fraction.
 
     :param fig:
@@ -74,7 +91,9 @@ def cm_to_fraction(fig, xy):
     return width / figsize[0], height / figsize[1]
 
 
-def fraction_to_cm(fig, xy) -> tuple[centimetres, centimetres]:
+def fraction_to_cm(
+    fig: matplotlib.figure.Figure, xy: tuple[float, float]
+) -> tuple[centimetres, centimetres]:
     """Convert standard axes fraction to upper left cm.
 
     :param fig:
@@ -90,13 +109,14 @@ def fraction_to_cm(fig, xy) -> tuple[centimetres, centimetres]:
 
 # --- Classes ---
 class CMTransform(Transform):
-    """A transformation class to convert coordinates from centimeters to figure
-    fractions in a Matplotlib figure.
+    """Convert coordinates from centimeters to figure fractions.
+
+    Works on a Matplotlib figure, with the origin at the upper left.
     """
 
-    input_dims = 2
-    output_dims = 2
-    has_inverse = True
+    input_dims = 2  # pyright: ignore[reportAssignmentType, reportIncompatibleMethodOverride]
+    output_dims = 2  # pyright: ignore[reportAssignmentType, reportIncompatibleMethodOverride]
+    has_inverse = True  # pyright: ignore[reportAssignmentType, reportIncompatibleMethodOverride]
 
     def __init__(self, fig: matplotlib.figure.Figure) -> None:
         """Initialize the CMTransform.
@@ -107,26 +127,33 @@ class CMTransform(Transform):
         super().__init__()
         self.fig = fig
 
-    def transform(self, values):
+    def transform(self, values: ArrayLike) -> np.ndarray:
+        """Transform cm coordinates (upper left origin) to figure fractions."""
         inch_coords = np.array(values) / 2.54
         figwidth, figheight = self.fig.get_size_inches()
         x, y = inch_coords.T
         return np.array([x / figwidth, 1 - (y / figheight)]).T  # flip y
 
-    def inverted(self):
+    def inverted(self) -> InvertedCMTransform:
+        """Return the inverse transform."""
         return InvertedCMTransform(self.fig)
 
 
 class InvertedCMTransform(Transform):
-    input_dims = 2
-    output_dims = 2
-    has_inverse = True
+    """Convert figure fractions to centimeters (upper left origin)."""
 
-    def __init__(self, fig, *args, **kwargs) -> None:
+    input_dims = 2  # pyright: ignore[reportAssignmentType, reportIncompatibleMethodOverride]
+    output_dims = 2  # pyright: ignore[reportAssignmentType, reportIncompatibleMethodOverride]
+    has_inverse = True  # pyright: ignore[reportAssignmentType, reportIncompatibleMethodOverride]
+
+    def __init__(
+        self, fig: matplotlib.figure.Figure, *args: Any, **kwargs: Any
+    ) -> None:
         super().__init__(*args, **kwargs)
         self.fig = fig
 
-    def transform(self, values):
+    def transform(self, values: ArrayLike) -> np.ndarray:
+        """Transform figure fractions to cm coordinates (upper left origin)."""
         # Convert figure coordinates to inches
         figwidth, figheight = self.fig.get_size_inches()
         x, y = np.array(values).T
@@ -137,5 +164,6 @@ class InvertedCMTransform(Transform):
         # Convert inches to cm
         return inch_coords * 2.54
 
-    def inverted(self):
+    def inverted(self) -> CMTransform:
+        """Return the inverse transform."""
         return CMTransform(self.fig)

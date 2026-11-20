@@ -8,6 +8,8 @@ text, and scalebars.
 __version__ = "0.1.2"
 __all__ = ["__version__"]
 # Import dependencies
+from typing import Any, cast
+
 import matplotlib.pyplot as plt
 
 # Import sub-modules
@@ -31,7 +33,7 @@ from . import (
 # ]
 
 
-def figure(**kwargs) -> classes.SciFigure:
+def figure(**kwargs: Any) -> classes.SciFigure:
     """Create a SciFigure object.
 
     This function is wraps plt.figure()
@@ -55,4 +57,4 @@ def figure(**kwargs) -> classes.SciFigure:
     if "FigureClass" in kwargs:
         msg = "Cannot set FigureClass in scilayout.figure(), use scilayout.classes.SciFigure instead."
         raise ValueError(msg)
-    return plt.figure(FigureClass=classes.SciFigure, **kwargs)
+    return cast(classes.SciFigure, plt.figure(FigureClass=classes.SciFigure, **kwargs))
