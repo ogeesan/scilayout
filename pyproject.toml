@@ -33,6 +33,8 @@ classifiers = [
 [project.urls]
 Repository = "https://github.com/ogeesan/scilayout.git"
 Issues = "https://github.com/ogeesan/scilayout/issues"
+Changelog = "https://github.com/ogeesan/scilayout/blob/main/CHANGELOG.md"
+Documentation = "https://ogeesan.github.io/scilayout/"
 # homepage = 
 
 [tool.setuptools.packages.find]
