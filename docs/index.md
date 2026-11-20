@@ -1,7 +1,3 @@
----
-hide:
-  - navigation
----
 # scilayout
 <!-- ![Image of scilayout](../social-media-preview.svg) -->
 
@@ -25,6 +21,8 @@ The idea is to make and interact with Matplotlib axes in centimetres from the to
 >>> myax.set_location((2, 10, 5, 13), method="extent")
 
 ```
+
+Next: how scilayout describes [locations and coordinates](coordinates.md), and the [API reference](reference/index.md).
 
 ## Why use this?
 

@@ -42,11 +42,12 @@ check: lint typecheck test
 
 # Serve docs locally
 docs:
-    uv run mkdocs serve
+    uv run zensical serve
 
-# Build docs
+# Build docs, failing on warnings and on unresolved cross-references
 docs-build:
-    uv run mkdocs build --strict
+    uv run zensical build --strict --clean
+    uv run python scripts/check_site.py
 
 # Build sdist and wheel
 build:

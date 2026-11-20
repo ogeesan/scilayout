@@ -28,15 +28,15 @@ LocationCM = tuple[centimetres, centimetres, centimetres, centimetres]
 class SciFigure(figure.Figure):
     """Figure that handles panel layout in cm with an upper left origin.
 
-    A :class:`matplotlib.figure.Figure` with methods to set its size in cm
-    (:meth:`set_size_cm`), add panels positioned in cm (:meth:`add_panel`), show a cm
-    guide grid (:meth:`draw_grid`) and save with settings made for documents
-    (:meth:`export`). Create one with :func:`scilayout.figure`.
+    A [`matplotlib.figure.Figure`][matplotlib.figure.Figure] with methods to set its size in cm
+    ([`set_size_cm`][scilayout.classes.SciFigure.set_size_cm]), add panels positioned in cm ([`add_panel`][scilayout.classes.SciFigure.add_panel]), show a cm
+    guide grid ([`draw_grid`][scilayout.classes.SciFigure.draw_grid]) and save with settings made for documents
+    ([`export`][scilayout.classes.SciFigure.export]). Create one with [`scilayout.figure`][scilayout.figure].
 
     Attributes
     ----------
     grid : GuideGridClass
-        Handler for the guide grid. Internal, use :meth:`draw_grid`.
+        Handler for the guide grid. Internal, use [`draw_grid`][scilayout.classes.SciFigure.draw_grid].
     transCM : scilayout.locations.CMTransform
         Transform from cm (upper left origin) to figure fraction.
 
@@ -61,10 +61,10 @@ class SciFigure(figure.Figure):
         Parameters
         ----------
         *args
-            Positional arguments for :class:`matplotlib.figure.Figure`.
+            Positional arguments for [`matplotlib.figure.Figure`][matplotlib.figure.Figure].
         **kwargs
-            Keyword arguments for :class:`matplotlib.figure.Figure`. See
-            https://matplotlib.org/stable/api/_as_gen/matplotlib.figure.Figure.html
+            Keyword arguments for [`matplotlib.figure.Figure`][matplotlib.figure.Figure],
+            for example ``figsize`` or ``dpi``.
 
         """
         # must initialise before super because it'll call clear
@@ -111,8 +111,8 @@ class SciFigure(figure.Figure):
             The old names "bbox" and "size" are deprecated aliases of "extent" and
             "bounds".
         **kwargs
-            Keyword arguments for :class:`PanelAxes`, which passes them to
-            :class:`matplotlib.axes.Axes`.
+            Keyword arguments for [`PanelAxes`][scilayout.classes.PanelAxes], which passes them to
+            [`matplotlib.axes.Axes`][matplotlib.axes.Axes].
 
         Returns
         -------
@@ -153,7 +153,7 @@ class SciFigure(figure.Figure):
         """Show the cm guide grid on the figure.
 
         The grid has markers every 1 cm (and half cm), with larger markers every 5 cm,
-        measured from the upper left of the figure. It is removed by :meth:`clear`.
+        measured from the upper left of the figure. It is removed by [`clear`][scilayout.classes.SciFigure.clear].
 
         Parameters
         ----------
@@ -182,7 +182,7 @@ class SciFigure(figure.Figure):
         Parameters
         ----------
         keep_observers : bool, optional
-            Passed to :meth:`matplotlib.figure.Figure.clear`.
+            Passed to [`matplotlib.figure.Figure.clear`][matplotlib.figure.Figure.clear].
 
         """
         super().clear(keep_observers=keep_observers)
@@ -190,12 +190,12 @@ class SciFigure(figure.Figure):
             self.grid._detach_ax()
 
     def clf(self, keep_observers: bool = False) -> None:
-        """Clear the figure entirely. An alias of :meth:`clear` in matplotlib.
+        """Clear the figure entirely. Does the same as [`clear`][scilayout.classes.SciFigure.clear].
 
         Parameters
         ----------
         keep_observers : bool, optional
-            Passed to :meth:`matplotlib.figure.Figure.clf`.
+            Passed to matplotlib's ``Figure.clf``.
 
         """
         super().clf(keep_observers=keep_observers)
@@ -283,15 +283,15 @@ class SciFigure(figure.Figure):
 class PanelAxes(Axes):
     """Axes that are positioned in cm from the upper left of the figure.
 
-    A :class:`matplotlib.axes.Axes` where the position is called a *location*, is in cm
+    A [`matplotlib.axes.Axes`][matplotlib.axes.Axes] where the position is called a *location*, is in cm
     with the origin at the upper left of the figure, and is set and read with
-    :meth:`set_location` and :meth:`get_location`. Create one with
-    :meth:`SciFigure.add_panel`.
+    [`set_location`][scilayout.classes.PanelAxes.set_location] and [`get_location`][scilayout.classes.PanelAxes.get_location]. Create one with
+    [`SciFigure.add_panel`][scilayout.classes.SciFigure.add_panel].
 
     Attributes
     ----------
     panellabel : PanelLabel or None
-        The panel's label, or None if it has none. See :meth:`add_label`.
+        The panel's label, or None if it has none. See [`add_label`][scilayout.classes.PanelAxes.add_label].
 
     """
 
@@ -317,9 +317,9 @@ class PanelAxes(Axes):
         panellabel : str, optional
             Letter to label the panel with, for example "a".
         method : {"bounds", "extent"}, optional
-            How to interpret ``location``. See :meth:`set_location`.
+            How to interpret ``location``. See [`set_location`][scilayout.classes.PanelAxes.set_location].
         **kwargs
-            Keyword arguments for :class:`matplotlib.axes.Axes`.
+            Keyword arguments for [`matplotlib.axes.Axes`][matplotlib.axes.Axes].
 
         """
         method = locations.resolve_method(method)
@@ -403,7 +403,7 @@ class PanelAxes(Axes):
         label : str
             Identifier string for the panel, for example "a".
         ha : str, optional
-            Horizontal alignment. See :meth:`PanelLabel.set_alignment`.
+            Horizontal alignment. See [`PanelLabel.set_alignment`][scilayout.classes.PanelLabel.set_alignment].
 
         """
         # TODO: allow for more complexity at inisitalisation (especially x/y offsets, positions)
@@ -542,8 +542,8 @@ class PanelLabel:
 
         Only ``h="right"`` currently has an effect: it moves the label 1 cm to the left
         of the panel. ``v`` is accepted but not used yet. For the alignment of the text
-        itself use ``PanelLabel.text``, see
-        https://matplotlib.org/stable/gallery/text_labels_and_annotations/text_alignment.html
+        itself use ``PanelLabel.text``, see matplotlib's
+        [text alignment examples](https://matplotlib.org/stable/gallery/text_labels_and_annotations/text_alignment.html).
 
         Parameters
         ----------
@@ -591,7 +591,7 @@ class FigureText:
         figure : matplotlib.figure.Figure
             The figure to add the text to.
         **kwargs
-            Keyword arguments for :meth:`matplotlib.figure.Figure.text`.
+            Keyword arguments for [`matplotlib.figure.Figure.text`][matplotlib.figure.Figure.text].
 
         """
         x, y = locations.cm_to_fraction(figure, (x, y))

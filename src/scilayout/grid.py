@@ -1,7 +1,7 @@
 """Grid overlay for matplotlib figures.
 
 Internal: this module is not part of the public API and may change without notice.
-Use :meth:`scilayout.SciFigure.draw_grid` to show the guide grid.
+Use [`scilayout.SciFigure.draw_grid`][scilayout.classes.SciFigure.draw_grid] to show the guide grid.
 """
 
 from typing import TYPE_CHECKING

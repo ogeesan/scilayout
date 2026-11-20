@@ -2,9 +2,9 @@
 
 ``scilayout.style.params`` holds the defaults for things like panel labels and
 scalebars. Change a parameter directly, or load several from a JSON file with
-:func:`use`; both affect elements created afterwards. Setting an option when creating an
+[`use`][scilayout.style.use]; both affect elements created afterwards. Setting an option when creating an
 element (for example ``fontsize`` on a ``ScaleBar``) overrides the parameter for that
-element only. :func:`reset` restores the defaults.
+element only. [`reset`][scilayout.style.reset] restores the defaults.
 
 Examples
 --------
@@ -18,15 +18,15 @@ Notes
 -----
 Parameters that are applied today:
 
-==========================  ===================================================
-``panellabel.case``         None keeps the text, "upper" or "lower" changes it
-``panellabel.font``         font family of panel labels
-``panellabel.fontsize``     font size of panel labels (pt)
-``panellabel.fontweight``   font weight of panel labels
-``panellabel.xoffset``      label offset to the right of the panel corner (cm)
-``panellabel.yoffset``      label offset below the panel corner (cm)
-``scalebars.fontsize``      default font size of scalebar text (pt)
-==========================  ===================================================
+| Parameter | Used for |
+| --- | --- |
+| `panellabel.case` | None keeps the text, "upper" or "lower" changes it |
+| `panellabel.font` | font family of panel labels |
+| `panellabel.fontsize` | font size of panel labels (pt) |
+| `panellabel.fontweight` | font weight of panel labels |
+| `panellabel.xoffset` | label offset to the right of the panel corner (cm) |
+| `panellabel.yoffset` | label offset below the panel corner (cm) |
+| `scalebars.fontsize` | default font size of scalebar text (pt) |
 
 Defined but not applied yet (setting them has no effect): ``panellabel.fontstyle``,
 ``figuretext.fontsize``, ``figuretext.fontstyle``, ``figuretext.fontweight``,
@@ -64,6 +64,7 @@ defaultstyles = {
     "stats.linewidth": 1,
     "stats.drop_amount": 0.025,
 }
+"""The default value of every style parameter. Not changed by :func:`use` or by setting a parameter, so it is what :func:`reset` restores."""
 
 
 class StyleDictionary(dict):
@@ -159,6 +160,7 @@ def _restore_style_dictionary(items: dict[str, Any]) -> StyleDictionary:
 
 
 params = StyleDictionary()
+"""The current style parameters. Read or set them like a dictionary, for example ``params["panellabel.fontsize"] = 10``."""
 
 # --- Config file handling ---
 

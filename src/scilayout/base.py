@@ -1,7 +1,7 @@
 """Base plotting functions for use in scientific plotting.
 
 Internal: this module is not part of the public API and may change without notice.
-Use :meth:`scilayout.SciFigure.export` to save a figure.
+Use [`scilayout.SciFigure.export`][scilayout.classes.SciFigure.export] to save a figure.
 """
 
 import logging

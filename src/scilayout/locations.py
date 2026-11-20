@@ -84,7 +84,7 @@ def resolve_method(method: str | None) -> LocationMethod:
 def to_extent(location: tuple[float, ...], method: LocationMethod) -> ExtentCM:
     """Convert a 4-tuple location in cm to an extent (corners).
 
-    A :class:`~scilayout.types.Bound` or :class:`~scilayout.types.Extent` instance
+    A [`Bound`][scilayout.types.Bound] or [`Extent`][scilayout.types.Extent] instance
     is interpreted by its type and ``method`` is ignored.
 
     Parameters

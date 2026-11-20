@@ -84,11 +84,12 @@ typeCheckingMode = "standard"
 dev = [
     "defusedxml>=0.7.1",
     "ipython>=8.12.3",
-    "mkdocs-material>=9.6.20",
+    "mkdocstrings[python]>=1.0.6",
     "pyqt5==5.15.11; sys_platform == 'win32'",          # windows compatibility
     "pyqt5-qt5==5.15.2; sys_platform == 'win32'",       # windows compatibility
     "pyright>=1.1.414",
     "pytest>=8.4.2",
     "pytest-cov>=7.0.0",
     "ruff>=0.17.6",
+    "zensical>=0.0.52",
 ]

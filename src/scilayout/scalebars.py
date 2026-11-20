@@ -51,7 +51,7 @@ class ScaleBar:
     """Scale bar for matplotlib plots.
 
     Horizontal or vertical, with text that can sit beside the bar or in a break in it.
-    A scalebar can be repositioned using the :meth:`move` method.
+    A scalebar can be repositioned using the [`move`][scilayout.scalebars.ScaleBar.move] method.
 
     Attributes
     ----------

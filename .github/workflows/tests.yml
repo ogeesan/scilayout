@@ -4,9 +4,6 @@ on:
   push:
     branches: [main]
   pull_request:
-    paths-ignore:
-      - "docs/**"
-      - "**/*.md"
   workflow_call:
 
 permissions:
@@ -67,7 +64,8 @@ jobs:
         with:
           enable-cache: true
       - run: uv sync --locked
-      - run: uv run mkdocs build --strict
+      - run: uv run zensical build --strict --clean
+      - run: uv run python scripts/check_site.py
 
   build:
     name: Build package

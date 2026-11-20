@@ -62,14 +62,13 @@ __all__ = [
 def figure(**kwargs: Any) -> classes.SciFigure:
     """Create a SciFigure object.
 
-    This function wraps ``plt.figure()``. See
-    https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.figure.html
-    for the figure arguments.
+    This function wraps [`plt.figure()`][matplotlib.pyplot.figure].
+    See its documentation for the figure arguments.
 
     Parameters
     ----------
     **kwargs
-        Keyword arguments for :func:`matplotlib.pyplot.figure`, for example
+        Keyword arguments for [`matplotlib.pyplot.figure`][matplotlib.pyplot.figure], for example
         ``figsize`` or ``num``. ``FigureClass`` cannot be set.
 
     Returns

@@ -1,0 +1,3 @@
+# Locations
+
+::: scilayout.locations

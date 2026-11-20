@@ -1,0 +1,3 @@
+# Scale bars
+
+::: scilayout.scalebars

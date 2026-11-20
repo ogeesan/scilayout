@@ -1,7 +1,7 @@
 """Types for locations on a figure.
 
-Rectangles are described either by their corners, an :class:`Extent`
-(``x0, y0, x1, y1``), or by their origin and size, a :class:`Bound`
+Rectangles are described either by their corners, an [`Extent`][scilayout.types.Extent]
+(``x0, y0, x1, y1``), or by their origin and size, a [`Bound`][scilayout.types.Bound]
 (``x, y, w, h``). The ``...CM``, ``...Inches`` and ``...Fraction`` names are aliases that
 say which unit is meant. They are the same classes, so the unit is documentation only.
 For cm the origin is the upper left of the figure.
@@ -98,7 +98,7 @@ class Extent(_ExtentFields):
 class Bound(NamedTuple):
     """Rectangle given by its origin and size (x, y, w, h).
 
-    An immutable 4-tuple with named fields. Unlike :class:`Extent` it is not checked
+    An immutable 4-tuple with named fields. Unlike [`Extent`][scilayout.types.Extent] it is not checked
     on creation.
 
     Attributes
