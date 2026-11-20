@@ -14,6 +14,9 @@ from .classes import PanelAxes
 
 __all__ = ["LinkedScaleBar", "ScaleBar"]
 
+CM_PER_INCH = 2.54
+CM_PER_POINT = CM_PER_INCH / 72
+
 
 def _check_coord_system(coord_system: str) -> None:
     """Raise ValueError if the coordinate system is not recognised."""
@@ -59,6 +62,8 @@ class ScaleBar:
         The bar.
     text : matplotlib.text.Text
         The label.
+    pad : float
+        Gap in cm between the edge of the line and the text.
 
     """
 
@@ -79,6 +84,7 @@ class ScaleBar:
         textstring: str | None = None,
         lw: float | None = None,
         fontsize: float | None = None,
+        pad: float | None = None,
     ) -> None:
         """Create a scalebar on a matplotlib axes.
 
@@ -115,12 +121,17 @@ class ScaleBar:
             parameter.
         fontsize : float, optional
             Font size of the text. Defaults to the "scalebars.fontsize" style parameter.
+        pad : float, optional
+            Gap in cm between the edge of the line and the text. It applies beside the
+            bar and, for text centred on the bar, on each side of the text in the break
+            in the bar. Defaults to the "scalebars.pad" style parameter. It can be
+            changed later, followed by [`move`][scilayout.scalebars.ScaleBar.move].
 
         Raises
         ------
         ValueError
             If ``orientation``, ``hpos``, ``vpos``, ``coordSystem`` or ``transform`` is
-            not one of the allowed values.
+            not one of the allowed values, or ``pad`` is negative.
         NotImplementedError
             If ``transform`` is "transAxes".
         TypeError
@@ -181,8 +192,11 @@ class ScaleBar:
             style.params["scalebars.fontsize"] if fontsize is None else fontsize
         )
 
-        self.text_pixel_pad_proportion = 0.5
-        # self.test_line_pad_cm = 0.025  # TODO: express padding as cm
+        pad = style.params["scalebars.pad"] if pad is None else pad
+        if pad < 0:
+            msg = f"pad must not be negative, got {pad}"
+            raise ValueError(msg)
+        self.pad = pad
 
         self._initialise_scalebar(*xy)
 
@@ -264,27 +278,41 @@ class ScaleBar:
             - inv_transform.transform((0, 0))[1]
         )
 
-        # Find line bbox
-        self.line.get_window_extent(renderer)
-        # TODO: make the line width change the padding
+        # The text starts `pad` cm from the edge of the line, which is half the line
+        # width (in points) beyond the line's centre. Convert to data coordinates, where
+        # an inverted axis gives a negative distance that moves the text the right way.
+        dpi = self.ax.get_figure().dpi  # pyright: ignore[reportOptionalMemberAccess]
+        from_centre_px = (self.pad + self.lw * CM_PER_POINT / 2) / CM_PER_INCH * dpi
+        pad_x_data = (
+            inv_transform.transform((from_centre_px, 0))[0]
+            - inv_transform.transform((0, 0))[0]
+        )
+        pad_y_data = (
+            inv_transform.transform((0, from_centre_px))[1]
+            - inv_transform.transform((0, 0))[1]
+        )
 
-        # Convert text width to data coordinates
-        inv_transform = self.ax.transData.inverted()
         gap = 0.0  # length of bar left empty around text centred on the bar
         if self.orientation == "h":
             text_xpos, text_ypos = np.mean(x_locs), y_locs[0]
-            pad = text_height_data * self.text_pixel_pad_proportion
             if self.vpos == "center":
-                gap = abs(text_width_data) + 2 * abs(pad)
+                gap = abs(text_width_data) + 2 * abs(pad_x_data)
             else:
-                text_ypos = text_ypos + pad if self.vpos == "top" else text_ypos - pad
+                text_ypos = (
+                    text_ypos + pad_y_data
+                    if self.vpos == "top"
+                    else text_ypos - pad_y_data
+                )
         else:
             text_xpos, text_ypos = x_locs[0], np.mean(y_locs)
-            pad = text_width_data * self.text_pixel_pad_proportion
             if self.hpos == "center":
-                gap = abs(text_height_data) + 2 * abs(pad)
+                gap = abs(text_height_data) + 2 * abs(pad_y_data)
             else:
-                text_xpos = text_xpos + pad if self.hpos == "right" else text_xpos - pad
+                text_xpos = (
+                    text_xpos + pad_x_data
+                    if self.hpos == "right"
+                    else text_xpos - pad_x_data
+                )
 
         if gap > 0:
             bar_length = float(np.hypot(x_locs[1] - x_locs[0], y_locs[1] - y_locs[0]))
@@ -380,6 +408,7 @@ class LinkedScaleBar:
         x_textstring: str | None = None,
         y_textstring: str | None = None,
         lw: float | None = None,
+        pad: float | None = None,
     ) -> None:
         """Create linked horizontal and vertical scale bars at the same position.
 
@@ -411,6 +440,9 @@ class LinkedScaleBar:
             Text of the vertical bar. Defaults to its length and unit.
         lw : float, optional
             Linewidth of both bars.
+        pad : float, optional
+            Gap in cm between the edge of each line and its text.
+            Defaults to the "scalebars.pad" style parameter.
 
         """
         if vat is None:
@@ -426,6 +458,7 @@ class LinkedScaleBar:
             transform=transform,
             textstring=x_textstring,
             lw=lw,
+            pad=pad,
         )
         self.y_scalebar = ScaleBar(
             ax,
@@ -438,6 +471,7 @@ class LinkedScaleBar:
             transform=transform,
             textstring=y_textstring,
             lw=lw,
+            pad=pad,
         )
         self.ax = ax
 

@@ -402,3 +402,177 @@ class TestCentredText:
         x, y = line_xy(bar)
         assert x == pytest.approx([2, 2])
         assert y == pytest.approx([4, 4])
+
+
+def display_gap_cm(bar: ScaleBar, side: str) -> float:
+    """Distance in cm from the centre of the line to the nearest edge of the text.
+
+    Measured in rendered pixels, on the side of the line named by ``side``.
+    """
+    fig = bar.ax.get_figure()
+    renderer = fig.canvas.get_renderer()  # pyright: ignore[reportAttributeAccessIssue, reportOptionalMemberAccess]
+    box = bar.text.get_window_extent(renderer)
+    xs, ys = line_xy(bar)
+    line_x, line_y = bar.ax.transData.transform((xs[0], ys[0]))
+    pixels = {
+        "below": line_y - box.y1,
+        "above": box.y0 - line_y,
+        "left": line_x - box.x1,
+        "right": box.x0 - line_x,
+    }[side]
+    return pixels / fig.dpi * 2.54  # pyright: ignore[reportOptionalMemberAccess]
+
+
+class TestPadding:
+    """Padding is the gap in cm between the edge of the line and the text."""
+
+    def half_line_cm(self, lw: float = 1) -> float:
+        return lw / 72 * 2.54 / 2
+
+    @pytest.mark.parametrize(
+        ("kwargs", "side"),
+        [
+            ({"vpos": "bottom"}, "below"),
+            ({"vpos": "top"}, "above"),
+            ({"orientation": "v", "hpos": "left"}, "left"),
+            ({"orientation": "v", "hpos": "right"}, "right"),
+        ],
+    )
+    def test_text_is_pad_cm_from_the_edge_of_the_line(self, panel, kwargs, side):
+        bar = ScaleBar(
+            panel, (3, 4), 3, unit="mm", coordSystem="data", pad=0.3, **kwargs
+        )
+        assert display_gap_cm(bar, side) == pytest.approx(
+            0.3 + self.half_line_cm(), abs=0.003
+        )
+
+    def test_default_pad_comes_from_the_style(self, panel):
+        bar = ScaleBar(panel, (3, 4), 3, coordSystem="data")
+        assert bar.pad == style.params["scalebars.pad"]
+
+    def test_style_changes_apply_to_new_bars(self, panel):
+        style.params["scalebars.pad"] = 0.4
+        bar = ScaleBar(panel, (3, 4), 3, unit="mm", coordSystem="data")
+        assert bar.pad == 0.4
+        assert display_gap_cm(bar, "below") == pytest.approx(
+            0.4 + self.half_line_cm(), abs=0.003
+        )
+
+    def test_explicit_pad_beats_the_style(self, panel):
+        style.params["scalebars.pad"] = 0.4
+        bar = ScaleBar(panel, (3, 4), 3, coordSystem="data", pad=0.05)
+        assert bar.pad == 0.05
+
+    def test_zero_pad_puts_the_text_against_the_line(self, panel):
+        bar = ScaleBar(panel, (3, 4), 3, unit="mm", coordSystem="data", pad=0)
+        assert display_gap_cm(bar, "below") == pytest.approx(
+            self.half_line_cm(), abs=0.003
+        )
+
+    def test_negative_pad_raises(self, panel):
+        with pytest.raises(ValueError, match="pad must not be negative"):
+            ScaleBar(panel, (3, 4), 3, coordSystem="data", pad=-0.1)
+
+    def test_thicker_lines_push_the_text_away(self, panel):
+        thin = ScaleBar(panel, (3, 4), 3, unit="mm", coordSystem="data", pad=0.1, lw=1)
+        thick = ScaleBar(panel, (3, 1), 3, unit="mm", coordSystem="data", pad=0.1, lw=8)
+        difference = display_gap_cm(thick, "below") - display_gap_cm(thin, "below")
+        assert difference == pytest.approx(7 / 72 * 2.54 / 2, abs=0.003)
+
+    def test_pad_does_not_depend_on_the_text(self, panel):
+        short = ScaleBar(
+            panel, (3, 4), 3, orientation="v", textstring="1", coordSystem="data"
+        )
+        long = ScaleBar(
+            panel,
+            (6, 4),
+            3,
+            orientation="v",
+            textstring="a much longer label",
+            coordSystem="data",
+        )
+        assert display_gap_cm(long, "left") == pytest.approx(
+            display_gap_cm(short, "left"), abs=0.003
+        )
+
+    def test_pad_does_not_depend_on_the_font_size(self, panel):
+        small = ScaleBar(
+            panel, (3, 4), 3, textstring="1", coordSystem="data", fontsize=6
+        )
+        large = ScaleBar(
+            panel, (3, 1), 3, textstring="1", coordSystem="data", fontsize=16
+        )
+        assert display_gap_cm(large, "below") == pytest.approx(
+            display_gap_cm(small, "below"), abs=0.003
+        )
+
+    def test_changing_pad_then_moving_updates_the_text(self, panel):
+        bar = ScaleBar(panel, (3, 4), 3, unit="mm", coordSystem="data", pad=0.1)
+        before = display_gap_cm(bar, "below")
+        bar.pad = 0.5
+        bar.move(3, 4)
+        assert display_gap_cm(bar, "below") - before == pytest.approx(0.4, abs=0.003)
+
+    def test_works_on_an_inverted_axis(self, panel):
+        panel.invert_yaxis()
+        bar = ScaleBar(
+            panel, (3, 4), 3, unit="mm", coordSystem="data", pad=0.3, vpos="bottom"
+        )
+        # still below the line on the page, even though larger y is now lower down
+        assert display_gap_cm(bar, "below") == pytest.approx(
+            0.3 + self.half_line_cm(), abs=0.003
+        )
+
+    def test_linked_scalebar_passes_pad_to_both_bars(self, panel):
+        linked = LinkedScaleBar(
+            panel, (3, 4), 3, 3, x_unit="s", y_unit="mV", coordSystem="data", pad=0.25
+        )
+        assert linked.x_scalebar.pad == 0.25
+        assert linked.y_scalebar.pad == 0.25
+        assert display_gap_cm(linked.x_scalebar, "below") == pytest.approx(
+            0.25 + self.half_line_cm(), abs=0.003
+        )
+        assert display_gap_cm(linked.y_scalebar, "left") == pytest.approx(
+            0.25 + self.half_line_cm(), abs=0.003
+        )
+
+
+class TestCentredGapPadding:
+    def visible_gap_cm(self, bar: ScaleBar) -> float:
+        """Gap between the two halves of the line, after the line caps are drawn."""
+        (_, left_end), (right_start, _) = segments(bar)
+        xs = bar.ax.transData.transform([(left_end, 0), (right_start, 0)])[:, 0]
+        fig = bar.ax.get_figure()
+        pixels = xs[1] - xs[0] - bar.line.get_linewidth() / 72 * fig.dpi  # pyright: ignore[reportOptionalMemberAccess]
+        return pixels / fig.dpi * 2.54  # pyright: ignore[reportOptionalMemberAccess]
+
+    def text_width_cm(self, bar: ScaleBar) -> float:
+        fig = bar.ax.get_figure()
+        renderer = fig.canvas.get_renderer()  # pyright: ignore[reportAttributeAccessIssue, reportOptionalMemberAccess]
+        return bar.text.get_window_extent(renderer).width / fig.dpi * 2.54  # pyright: ignore[reportOptionalMemberAccess]
+
+    @pytest.mark.parametrize("pad", [0, 0.1, 0.3])
+    def test_space_between_text_and_bar_is_pad(self, panel, pad):
+        bar = ScaleBar(
+            panel,
+            (0.5, 4),
+            9,
+            unit="mm",
+            coordSystem="data",
+            vpos="center",
+            pad=pad,
+        )
+        assert self.visible_gap_cm(bar) == pytest.approx(
+            self.text_width_cm(bar) + 2 * pad, abs=0.005
+        )
+
+    def test_thick_lines_keep_the_same_visible_gap(self, panel):
+        thin = ScaleBar(
+            panel, (0.5, 4), 9, unit="mm", coordSystem="data", vpos="center", lw=1
+        )
+        thick = ScaleBar(
+            panel, (0.5, 2), 9, unit="mm", coordSystem="data", vpos="center", lw=6
+        )
+        assert self.visible_gap_cm(thick) == pytest.approx(
+            self.visible_gap_cm(thin), abs=0.005
+        )

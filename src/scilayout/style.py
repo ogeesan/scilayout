@@ -29,6 +29,7 @@ All parameters:
 | `panellabel.yoffset` | label offset below the panel corner (cm) |
 | `scalebars.fontsize` | default font size of scalebar text (pt) |
 | `scalebars.linewidth` | default linewidth of scalebars |
+| `scalebars.pad` | default gap between a scalebar's line and its text (cm) |
 | `figuretext.fontsize` | default font size of `FigureText` (pt) |
 | `figuretext.fontstyle` | default font style of `FigureText` |
 | `figuretext.fontweight` | default font weight of `FigureText` |
@@ -63,6 +64,7 @@ defaultstyles = {
     "panellabel.yoffset": -0.3,
     "scalebars.fontsize": 8,
     "scalebars.linewidth": 1,
+    "scalebars.pad": 0.1,
     "stats.linecolor": "black",
     "stats.linewidth": 1,
     "stats.drop_amount": 0.025,
