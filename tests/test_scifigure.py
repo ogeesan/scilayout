@@ -112,11 +112,26 @@ class TestPanelAxes:
         assert ax.panellabel is first
         assert first.text.get_text() == "b"
 
-    def test_add_label_right_alignment_shifts_offset(self, scifig):
+    def test_add_label_alignment_is_applied_to_the_text(self, scifig):
+        ax = scifig.add_panel((1, 1, 3, 3), method="bounds")
+        ax.add_label("a", ha="right", va="top")
+        assert ax.panellabel is not None
+        assert ax.panellabel.text.get_horizontalalignment() == "right"
+        assert ax.panellabel.text.get_verticalalignment() == "top"
+
+    def test_add_label_alignment_does_not_move_the_offset(self, scifig):
         ax = scifig.add_panel((1, 1, 3, 3), method="bounds")
         ax.add_label("a", ha="right")
         assert ax.panellabel is not None
-        assert ax.panellabel.xoffset == -1
+        assert ax.panellabel.xoffset == style.params["panellabel.xoffset"]
+
+    def test_add_label_keeps_the_other_alignment(self, scifig):
+        ax = scifig.add_panel((1, 1, 3, 3), method="bounds")
+        ax.add_label("a", ha="right")
+        ax.add_label("a", va="top")
+        assert ax.panellabel is not None
+        assert ax.panellabel.text.get_horizontalalignment() == "right"
+        assert ax.panellabel.text.get_verticalalignment() == "top"
 
     def test_clear_removes_label(self, scifig):
         ax = scifig.add_panel((1, 1, 3, 3), method="bounds", panellabel="a")

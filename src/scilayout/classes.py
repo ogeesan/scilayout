@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import contextlib
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, Literal, cast
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -413,7 +413,9 @@ class PanelAxes(Axes):
     def add_label(
         self,
         label: str,
-        ha: str | None = None,
+        ha: Literal["left", "center", "right"] | None = None,
+        va: Literal["baseline", "bottom", "center", "center_baseline", "top"]
+        | None = None,
     ) -> None:
         """Add a label to the panel, or change its text if it already has one.
 
@@ -421,8 +423,11 @@ class PanelAxes(Axes):
         ----------
         label : str
             Identifier string for the panel, for example "a".
-        ha : str, optional
-            Horizontal alignment. See [`PanelLabel.set_alignment`][scilayout.classes.PanelLabel.set_alignment].
+        ha : {"left", "center", "right"}, optional
+            Horizontal alignment of the text. See
+            [`PanelLabel.set_alignment`][scilayout.classes.PanelLabel.set_alignment].
+        va : {"baseline", "bottom", "center", "center_baseline", "top"}, optional
+            Vertical alignment of the text.
 
         """
         # TODO: allow for more complexity at inisitalisation (especially x/y offsets, positions)
@@ -431,7 +436,9 @@ class PanelAxes(Axes):
         else:
             self.panellabel = PanelLabel(self, label)
         if ha is not None:
-            self.panellabel.set_alignment(h=ha)
+            self.panellabel.text.set_horizontalalignment(ha)
+        if va is not None:
+            self.panellabel.text.set_verticalalignment(va)
 
     def clear(self) -> None:
         """Clear the axes, including the panel label."""
@@ -556,25 +563,36 @@ class PanelLabel:
         self.yoffset = y
         self.set_location(x_cm, y_cm)
 
-    def set_alignment(self, h: str = "left", v: str = "baseline") -> None:
-        """Align the panel letter.
+    def set_alignment(
+        self,
+        h: Literal["left", "center", "right"] = "left",
+        v: Literal[
+            "baseline", "bottom", "center", "center_baseline", "top"
+        ] = "baseline",
+    ) -> None:
+        """Align the label text to its position.
 
-        Only ``h="right"`` currently has an effect: it moves the label 1 cm to the left
-        of the panel. ``v`` is accepted but not used yet. For the alignment of the text
-        itself use ``PanelLabel.text``, see matplotlib's
-        [text alignment examples](https://matplotlib.org/stable/gallery/text_labels_and_annotations/text_alignment.html).
+        The position is the panel's upper left corner plus the offset (see
+        [`set_offset`][scilayout.classes.PanelLabel.set_offset]). The alignment says
+        which point of the text sits there: with ``h="right"`` the right edge of the
+        text is at the position, so the label grows to the left, away from the panel.
+        The defaults are the ones labels start with.
 
         Parameters
         ----------
-        h : str, optional
+        h : {"left", "center", "right"}, optional
             Horizontal alignment, "left" by default.
-        v : str, optional
-            Vertical alignment. Not used yet.
+        v : {"baseline", "bottom", "center", "center_baseline", "top"}, optional
+            Vertical alignment, "baseline" by default.
+
+        Raises
+        ------
+        ValueError
+            If ``h`` or ``v`` is not one of the allowed values.
 
         """
-        # todo: change this behaviour?
-        if h == "right":
-            self.set_offset(x=-1)
+        self.text.set_horizontalalignment(h)
+        self.text.set_verticalalignment(v)
 
 
 class FigureText:
