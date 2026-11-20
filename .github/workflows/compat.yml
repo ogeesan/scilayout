@@ -6,8 +6,8 @@ name: Matplotlib Compatibility Tests
 
 on:
   schedule:
-    - cron: "0 20 * * 5"
-      timezone: 'Australia/Melbourne'
+    - cron: "0 6 * * 6"
+      timezone: "Australia/Melbourne"
   workflow_dispatch:
   pull_request:
 
