@@ -118,9 +118,9 @@ class SciFigure(figure.Figure):
             "bounds" reads (x, y, width, height).
             "extent" reads (x0, y0, x1, y1), the upper left and lower right corners.
             Not specifying a method currently means "extent", but the default will
-            change to "bounds" in a future release. Specify it to avoid the warning.
+            change to "bounds" in version 1.0. Specify it to avoid the warning.
             The old names "bbox" and "size" are deprecated aliases of "extent" and
-            "bounds".
+            "bounds", and will be removed in version 1.0.
         **kwargs
             Keyword arguments for [`PanelAxes`][scilayout.classes.PanelAxes], which passes them to
             [`matplotlib.axes.Axes`][matplotlib.axes.Axes].
@@ -368,7 +368,7 @@ class PanelAxes(Axes):
             "bounds" reads (x, y, width, height).
             "extent" reads (x0, y0, x1, y1), the upper left and lower right corners.
             Not specifying a method currently means "extent", but the default will
-            change to "bounds" in a future release. Specify it to avoid the warning.
+            change to "bounds" in version 1.0. Specify it to avoid the warning.
 
         Raises
         ------

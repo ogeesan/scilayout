@@ -34,6 +34,15 @@ class TestResolveMethod:
         with pytest.warns(FutureWarning, match=f"'{new}'"):
             assert resolve_method(old) == new
 
+    def test_the_default_warning_names_version_1_0(self):
+        with pytest.warns(FutureWarning, match="scilayout 1.0"):
+            resolve_method(None)
+
+    @pytest.mark.parametrize("old", ["size", "bbox"])
+    def test_deprecated_names_warn_they_go_in_version_1_0(self, old):
+        with pytest.warns(FutureWarning, match="removed in scilayout 1.0"):
+            resolve_method(old)
+
     def test_unknown_raises(self):
         with pytest.raises(ValueError, match="method must be"):
             resolve_method("fraction")

@@ -33,13 +33,17 @@ LocationMethod = Literal["bounds", "extent"]
 
 _DEPRECATED_METHODS: dict[str, LocationMethod] = {"size": "bounds", "bbox": "extent"}
 
+REMOVAL_VERSION = "1.0"
+"""The version in which the default ``method`` becomes ``"bounds"`` and the deprecated
+method names are removed."""
+
 
 def resolve_method(method: str | None) -> LocationMethod:
     """Validate a location ``method``, warning about deprecated usage.
 
     ``None`` (not specifying a method) currently means ``"extent"`` but this will
-    change to ``"bounds"``. The old names ``"bbox"`` and ``"size"`` are deprecated
-    aliases of ``"extent"`` and ``"bounds"``.
+    change to ``"bounds"`` in version 1.0. The old names ``"bbox"`` and ``"size"`` are
+    deprecated aliases of ``"extent"`` and ``"bounds"``, and will be removed in 1.0.
 
     Parameters
     ----------
@@ -60,9 +64,9 @@ def resolve_method(method: str | None) -> LocationMethod:
     if method is None:
         warnings.warn(
             "The default interpretation of a location tuple is changing from "
-            "'extent' (x0, y0, x1, y1) to 'bounds' (x, y, width, height) in a "
-            "future release. Pass method='extent' to keep the current behaviour, "
-            "or method='bounds' to adopt the new one.",
+            "'extent' (x0, y0, x1, y1) to 'bounds' (x, y, width, height) in "
+            f"scilayout {REMOVAL_VERSION}. Pass method='extent' to keep the current "
+            "behaviour, or method='bounds' to adopt the new one.",
             FutureWarning,
             stacklevel=find_stack_level(),
         )
@@ -70,7 +74,8 @@ def resolve_method(method: str | None) -> LocationMethod:
     if method in _DEPRECATED_METHODS:
         new = _DEPRECATED_METHODS[method]
         warnings.warn(
-            f"method={method!r} is deprecated, use method={new!r} instead.",
+            f"method={method!r} is deprecated and will be removed in scilayout "
+            f"{REMOVAL_VERSION}, use method={new!r} instead.",
             FutureWarning,
             stacklevel=find_stack_level(),
         )

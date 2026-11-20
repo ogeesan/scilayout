@@ -57,11 +57,11 @@ Bounds with a negative width or height, and extents whose corners are the wrong 
 !!! warning "The default is changing"
 
     If you don't give a `method`, a location is currently read as an **extent**, and scilayout emits a `FutureWarning`.
-    In a future release the default will change to **bounds**.
+    In version 1.0 the default will change to **bounds**.
     Pass `method="extent"` to keep your current behaviour, or `method="bounds"` to adopt the new one.
     Either removes the warning.
 
-    The older names `"bbox"` (now `"extent"`) and `"size"` (now `"bounds"`) still work but are deprecated.
+    The older names `"bbox"` (now `"extent"`) and `"size"` (now `"bounds"`) still work but are deprecated, and will be removed in version 1.0.
 
 ## Reading a location back
 
