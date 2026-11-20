@@ -20,6 +20,11 @@ lint:
 fix:
     uv run ruff check --fix .
 
+# Run the layout test and keep its SVG/PNG output in test_outputs/ to look at
+visual:
+    uv run pytest tests/test_layout_svg.py --keep-outputs -q
+    @echo "open test_outputs/layout_with_grid.svg (or .png)"
+
 # Type check
 typecheck:
     uv run pyright
