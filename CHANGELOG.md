@@ -5,15 +5,27 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-21
+
+This release states which versions of matplotlib and numpy scilayout supports, and tests them.
+
 ### Added
 
 - A `py.typed` marker, so type checkers use scilayout's annotations.
-- Python version, operating system and `Typing :: Typed` classifiers in the package metadata.
+- Python version, operating system and `Typing :: Typed` classifiers in the package metadata, and refreshed keywords.
+- A `CITATION.cff` file, so GitHub offers a "Cite this repository" button.
 
 ### Changed
 
 - Declared the supported dependency versions: matplotlib 3.5 or newer and numpy 1.21.3 or newer.
   The tests pass on these versions, which before were not stated.
+
+### Development
+
+- A compatibility workflow runs the tests on matplotlib 3.5.0, 3.5.3, 3.6.3, 3.7.5, 3.8.4, 3.9.4, 3.10.5 and the newest release, on every pull request and weekly.
+- GitHub Actions are pinned to commit SHAs and Dependabot security updates cover them.
+- Updated the locked Pillow to 12.3.0 (Python 3.10) and 13.0.0 (newer Pythons).
+- The SVG layout tests read font sizes from older matplotlib versions.
 
 ## [0.2.0] - 2026-11-20
 
@@ -97,6 +109,7 @@ See [Locations and coordinates](https://ogeesan.github.io/scilayout/coordinates/
 
 See the [release notes](https://github.com/ogeesan/scilayout/releases/tag/v0.1.2).
 
-[Unreleased]: https://github.com/ogeesan/scilayout/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/ogeesan/scilayout/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/ogeesan/scilayout/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/ogeesan/scilayout/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/ogeesan/scilayout/releases/tag/v0.1.2
