@@ -37,6 +37,17 @@ def output_dir(
     return tmp_path_factory.mktemp("outputs")
 
 
+def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
+    """Mark every test that writes figures to ``output_dir`` as ``visual``.
+
+    Marking by the fixture means a new visual test is picked up without anyone
+    remembering to tag it, and ``pytest -m visual`` always finds all of them.
+    """
+    for item in items:
+        if "output_dir" in getattr(item, "fixturenames", ()):
+            item.add_marker(pytest.mark.visual)
+
+
 def pytest_report_header(config: pytest.Config) -> str | None:
     if config.getoption("--keep-outputs"):
         return f"keeping test figures in {OUTPUTS}"

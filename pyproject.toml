@@ -77,6 +77,12 @@ convention = "numpy"
     "ANN",  # type annotations
 ]
 
+[tool.pytest.ini_options]
+addopts = "--strict-markers"
+markers = [
+    "visual: writes figures (SVG and PNG) to look at; added automatically to any test that uses the output_dir fixture. Run them with `pytest -m visual --keep-outputs`.",
+]
+
 [tool.pyright]
 include = ["src", "tests"]
 pythonVersion = "3.10"

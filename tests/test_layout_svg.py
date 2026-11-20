@@ -3,8 +3,8 @@
 Positions are read back out of the SVG (the thing a journal or Illustrator would see),
 and compared with where the figure was *asked* to put them, in cm from the upper left.
 
-To look at the result, run ``pytest --keep-outputs tests/test_layout_svg.py`` (or
-``just visual``) and open, in ``test_outputs/``:
+To look at the result, run ``just visual`` (``pytest -m visual --keep-outputs``) and
+open, in ``test_outputs/``:
 
 - ``layout.svg`` / ``layout.png``: the figure
 - ``layout_with_grid.svg`` / ``layout_with_grid.png``: the same figure with the cm

@@ -1,6 +1,6 @@
 """A picture of scale bar padding, with guides showing where the text should be.
 
-Run ``pytest --keep-outputs tests/test_padding_visual.py`` (or ``just visual``) and open
+Run ``just visual`` (``pytest -m visual --keep-outputs``) and open
 ``test_outputs/padding.svg`` or ``padding.png``.
 
 Each cell is a scale bar with a different ``pad`` (columns) and text position (rows),
