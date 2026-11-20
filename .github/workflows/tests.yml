@@ -14,8 +14,8 @@ jobs:
     name: Lint and type check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.3.3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           enable-cache: true
           python-version: "3.10"
@@ -41,8 +41,8 @@ jobs:
     env:
       MPLBACKEND: Agg
     steps:
-      - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.3.3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           enable-cache: true
           python-version: ${{ matrix.python-version }}
@@ -51,7 +51,7 @@ jobs:
         run: uv run pytest --cov=scilayout --cov-report=xml
       - name: Upload coverage to Coveralls
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.13'
-        uses: coverallsapp/github-action@v2
+        uses: coverallsapp/github-action@8d6379e14d29928660c4ba802d8e85393440b329 # v2.3.8
         with:
           file: coverage.xml
 
@@ -59,8 +59,8 @@ jobs:
     name: Build docs
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.3.3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           enable-cache: true
       - run: uv sync --locked
@@ -71,8 +71,8 @@ jobs:
     name: Build package
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.3.3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
       - run: uv build
       - name: Check the wheel installs and imports
         run: uv run --isolated --no-project --with dist/*.whl python -c "import scilayout; print(scilayout.__version__)"
