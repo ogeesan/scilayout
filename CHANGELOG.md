@@ -5,6 +5,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Added
+
+- A `py.typed` marker, so type checkers use scilayout's annotations.
+- Python version, operating system and `Typing :: Typed` classifiers in the package metadata.
+
 ### Changed
 
 - Declared the supported dependency versions: matplotlib 3.5 or newer and numpy 1.21.3 or newer.
