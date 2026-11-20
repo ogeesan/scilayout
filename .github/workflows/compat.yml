@@ -1,4 +1,4 @@
-name: Compatibility Tests
+name: Matplotlib Compatibility Tests
 
 # Runs the tests against the newest and the oldest supported matplotlib and numpy.
 # The regular Tests workflow uses the versions pinned in uv.lock.
