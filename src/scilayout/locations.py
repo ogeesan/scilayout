@@ -10,6 +10,7 @@ import numpy as np
 from matplotlib.transforms import Transform
 from numpy.typing import ArrayLike
 
+from ._utils import find_stack_level
 from .types import Bound, Extent, ExtentCM, centimetres
 
 LocationMethod = Literal["bounds", "extent"]
@@ -22,7 +23,7 @@ LocationMethod = Literal["bounds", "extent"]
 _DEPRECATED_METHODS: dict[str, LocationMethod] = {"size": "bounds", "bbox": "extent"}
 
 
-def resolve_method(method: str | None, stacklevel: int = 3) -> LocationMethod:
+def resolve_method(method: str | None) -> LocationMethod:
     """Validate a location ``method``, warning about deprecated usage.
 
     ``None`` (not specifying a method) currently means ``"extent"`` but this will
@@ -33,9 +34,6 @@ def resolve_method(method: str | None, stacklevel: int = 3) -> LocationMethod:
     ----------
     method : str | None
         ``"bounds"``, ``"extent"``, or a deprecated value.
-    stacklevel : int
-        Passed to ``warnings.warn``. The default points at the caller of the
-        function that called this one.
 
     Returns
     -------
@@ -50,7 +48,7 @@ def resolve_method(method: str | None, stacklevel: int = 3) -> LocationMethod:
             "future release. Pass method='extent' to keep the current behaviour, "
             "or method='bounds' to adopt the new one.",
             FutureWarning,
-            stacklevel=stacklevel,
+            stacklevel=find_stack_level(),
         )
         return "extent"
     if method in _DEPRECATED_METHODS:
@@ -58,7 +56,7 @@ def resolve_method(method: str | None, stacklevel: int = 3) -> LocationMethod:
         warnings.warn(
             f"method={method!r} is deprecated, use method={new!r} instead.",
             FutureWarning,
-            stacklevel=stacklevel,
+            stacklevel=find_stack_level(),
         )
         return new
     if method in ("bounds", "extent"):

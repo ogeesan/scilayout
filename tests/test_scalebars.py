@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 import pytest
 
@@ -145,6 +147,12 @@ class TestScaleBarValidation:
         with pytest.raises(ValueError, match="must be"):
             ScaleBar(panel, (3, 4), 2, **kwargs)
 
+    def test_find_x_y_rejects_unknown_coordinate_system(self, panel):
+        # move() validates first, so this guards direct use of the private method
+        bar = ScaleBar(panel, (3, 4), 2, coordSystem="data")
+        with pytest.raises(ValueError, match="Unknown coordinate system"):
+            bar._find_x_y(1, 1, "furlongs")
+
     def test_move_with_invalid_coordinate_system_raises(self, panel):
         bar = ScaleBar(panel, (3, 4), 2, coordSystem="data")
         with pytest.raises(ValueError, match="coordSystem"):
@@ -184,3 +192,199 @@ class TestLinkedScaleBar:
         linked = LinkedScaleBar(panel, (3, 4), 2, 1, coordSystem="data")
         linked.move(0.5, 0.25, coordSystem="fraction")
         assert np.allclose(line_xy(linked.x_scalebar)[0], [5, 7])
+
+
+def text_extent_data(bar: ScaleBar) -> tuple[float, float, float, float]:
+    """The text's bounding box (x0, y0, x1, y1) in data coordinates."""
+    renderer = bar.ax.figure.canvas.get_renderer()  # pyright: ignore[reportAttributeAccessIssue, reportOptionalMemberAccess]
+    box = bar.text.get_window_extent(renderer).transformed(bar.ax.transData.inverted())
+    return box.x0, box.y0, box.x1, box.y1
+
+
+def segments(bar: ScaleBar) -> list[tuple[float, float]]:
+    """The visible (start, end) of each piece of the bar along its length."""
+    x, y = line_xy(bar)
+    values = x if bar.orientation == "h" else y
+    nan = [i for i, v in enumerate(values) if np.isnan(v)]
+    assert len(nan) == 1
+    return [
+        (values[0], values[nan[0] - 1]),
+        (values[nan[0] + 1], values[-1]),
+    ]
+
+
+class TestCentredText:
+    def test_horizontal_text_is_on_the_bar(self, panel):
+        bar = ScaleBar(panel, (2, 4), 6, unit="mm", coordSystem="data", vpos="center")
+        x, y = bar.text.get_position()
+        assert x == pytest.approx(5)
+        assert y == pytest.approx(4)
+        assert bar.text.get_verticalalignment() == "center"
+        assert bar.text.get_horizontalalignment() == "center"
+
+    def test_horizontal_bar_has_a_gap_around_the_text(self, panel):
+        bar = ScaleBar(panel, (2, 4), 6, unit="mm", coordSystem="data", vpos="center")
+        (_, left_end), (right_start, _) = segments(bar)
+        text_x0, _, text_x1, _ = text_extent_data(bar)
+        assert left_end <= text_x0
+        assert right_start >= text_x1
+        # the gap is centred on the bar
+        assert (left_end + right_start) / 2 == pytest.approx(5)
+
+    def test_horizontal_bar_ends_stay_where_they_were(self, panel):
+        bar = ScaleBar(panel, (2, 4), 6, unit="mm", coordSystem="data", vpos="center")
+        (start, _), (_, end) = segments(bar)
+        assert start == pytest.approx(2)
+        assert end == pytest.approx(8)
+        _, y = line_xy(bar)
+        assert [v for v in y if not np.isnan(v)] == pytest.approx([4, 4, 4, 4])
+
+    def test_vertical_text_is_on_the_bar(self, panel):
+        bar = ScaleBar(
+            panel,
+            (3, 1),
+            6,
+            unit="mm",
+            coordSystem="data",
+            orientation="v",
+            hpos="center",
+        )
+        x, y = bar.text.get_position()
+        assert x == pytest.approx(3)
+        assert y == pytest.approx(4)
+        assert bar.text.get_rotation() == 90
+        assert bar.text.get_horizontalalignment() == "center"
+
+    def test_vertical_bar_has_a_gap_around_the_text(self, panel):
+        bar = ScaleBar(
+            panel,
+            (3, 0.5),
+            6,
+            unit="mm",
+            coordSystem="data",
+            orientation="v",
+            hpos="center",
+        )
+        (_, lower_end), (upper_start, _) = segments(bar)
+        _, text_y0, _, text_y1 = text_extent_data(bar)
+        assert lower_end <= text_y0
+        assert upper_start >= text_y1
+        assert (lower_end + upper_start) / 2 == pytest.approx(3.5)
+
+    def test_longer_text_makes_a_longer_gap(self, panel):
+        short = ScaleBar(
+            panel, (0.5, 4), 9, textstring="1", coordSystem="data", vpos="center"
+        )
+        long = ScaleBar(
+            panel,
+            (0.5, 2),
+            9,
+            textstring="a much longer label",
+            coordSystem="data",
+            vpos="center",
+        )
+
+        def gap(bar):
+            (_, end), (start, _) = segments(bar)
+            return start - end
+
+        assert gap(long) > gap(short)
+
+    def test_text_wider_than_the_bar_hides_the_bar_with_a_warning(self, panel):
+        # zero-length pieces would still draw as dots, so nothing is drawn at all
+        with pytest.warns(UserWarning, match="bar is hidden") as record:
+            bar = ScaleBar(
+                panel,
+                (2, 4),
+                0.2,
+                textstring="much too long for this bar",
+                coordSystem="data",
+                vpos="center",
+            )
+        x, y = line_xy(bar)
+        assert all(np.isnan(x + y))
+        # one warning, blaming this line rather than scilayout internals
+        assert len(record) == 1
+        assert record[0].filename == __file__
+
+    def test_warning_names_the_text_and_sizes(self, panel):
+        with pytest.warns(UserWarning) as record:
+            ScaleBar(
+                panel,
+                (2, 4),
+                0.2,
+                textstring="too long",
+                coordSystem="data",
+                vpos="center",
+            )
+        message = str(record[0].message)
+        assert "'too long'" in message
+        assert "0.2" in message
+
+    def test_moving_a_hidden_bar_warns_again_at_the_callers_line(self, panel):
+        with pytest.warns(UserWarning, match="bar is hidden"):
+            bar = ScaleBar(
+                panel,
+                (2, 4),
+                0.2,
+                textstring="too long",
+                coordSystem="data",
+                vpos="center",
+            )
+        with pytest.warns(UserWarning, match="bar is hidden") as record:
+            bar.move(3, 3)
+        assert record[0].filename == __file__
+
+    def test_linked_scalebar_warning_points_at_the_caller(self, panel):
+        with pytest.warns(UserWarning, match="bar is hidden") as record:
+            LinkedScaleBar(
+                panel,
+                (2, 1),
+                0.2,
+                0.2,
+                x_unit="seconds long",
+                coordSystem="data",
+                vat="center",
+            )
+        assert record[0].filename == __file__
+
+    def test_no_warning_when_the_bar_is_long_enough(self, panel):
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            ScaleBar(panel, (1, 4), 8, unit="mm", coordSystem="data", vpos="center")
+
+    def test_moving_keeps_the_gap(self, panel):
+        bar = ScaleBar(panel, (2, 4), 6, unit="mm", coordSystem="data", vpos="center")
+        (_, end), (start, _) = segments(bar)
+        bar.move(1, 1)
+        (_, new_end), (new_start, _) = segments(bar)
+        assert new_start - new_end == pytest.approx(start - end)
+        assert (new_end + new_start) / 2 == pytest.approx(4)  # 1 + 6/2
+
+    def test_uncentred_bars_are_not_broken(self, panel):
+        bar = ScaleBar(panel, (2, 4), 6, unit="mm", coordSystem="data")
+        x, y = line_xy(bar)
+        assert not any(np.isnan(x + y))
+
+    def test_centre_is_valid_for_the_text_axis_only(self, panel):
+        # 'center' along the bar is the default; across the bar it is opt-in
+        ScaleBar(panel, (2, 4), 6, coordSystem="data", vpos="center", hpos="center")
+        with pytest.raises(ValueError, match="must be"):
+            ScaleBar(panel, (2, 4), 6, coordSystem="data", vpos="middle")
+
+    def test_linked_scalebar_can_centre_text(self, panel):
+        linked = LinkedScaleBar(
+            panel, (2, 1), 6, 4, coordSystem="data", vat="center", hat="center"
+        )
+        assert linked.x_scalebar.vpos == "center"
+        assert linked.y_scalebar.hpos == "center"
+        assert any(np.isnan(line_xy(linked.x_scalebar)[0]))
+        assert any(np.isnan(line_xy(linked.y_scalebar)[1]))
+
+    def test_zero_length_bar_is_left_alone(self, panel):
+        bar = ScaleBar(
+            panel, (2, 4), 0, textstring="0", coordSystem="data", vpos="center"
+        )
+        x, y = line_xy(bar)
+        assert x == pytest.approx([2, 2])
+        assert y == pytest.approx([4, 4])

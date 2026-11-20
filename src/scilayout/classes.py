@@ -15,6 +15,7 @@ from matplotlib.figure import Figure
 from matplotlib.text import Text
 
 from . import base, locations, style
+from ._utils import find_stack_level
 from .grid import GuideGridClass
 from .types import ExtentCM, centimetres
 
@@ -125,18 +126,15 @@ class SciFigure(figure.Figure):
         **kwargs: Any,
     ) -> None:
         """Add cm grid guide to the figure."""
-        if self.grid is None:
-            self.grid = GuideGridClass(self, **kwargs)
-        else:
-            # if kwargs are given warn that
-            # changing settings with this function is not implemented
-            if kwargs:
-                # TODO: implement changing grid settings
-                warnings.warn(
-                    "Setting grid settings with draw_grid() is not implemented.",
-                    stacklevel=2,
-                )
-            self.grid.show()
+        # if kwargs are given warn that
+        # changing settings with this function is not implemented
+        if kwargs:
+            # TODO: implement changing grid settings
+            warnings.warn(
+                "Setting grid settings with draw_grid() is not implemented.",
+                stacklevel=find_stack_level(),
+            )
+        self.grid.show()
 
     def clear(self, keep_observers: bool = False) -> None:
         """Clear the figure (including removal of grid)."""
@@ -314,9 +312,11 @@ class PanelAxes(Axes):
 class PanelLabel:
     """A label for a multi-part figure.
 
-    The letter has its initialisation position at exactly the upper left corner of the
-    axes, so if you use `fill_yaxis` on it then the letter will be touching the data. An
-    upper case 12 point letter is just under 0.5cm tall, so an offset of 0.1 looks good.
+    The label's baseline starts at exactly the upper left corner of the axes and is then
+    moved by the 'panellabel.xoffset' and 'panellabel.yoffset' style parameters (cm,
+    negative is left and up). The defaults put the letter just above and to the left of
+    the corner, clear of a 10 point y tick label at the top of the axis. Use a smaller
+    (less negative) offset for smaller tick labels.
 
     The 'anchor position' is the top left corner of the associated PanelAxes.
 

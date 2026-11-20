@@ -61,6 +61,12 @@ class TestWindowLocation:
         with pytest.raises(NotImplementedError, match="not implemented"):
             scifig.set_location(10, 20)
 
+    def test_qt_backend_without_window_manager_raises(self, scifig, monkeypatch):
+        monkeypatch.setattr("scilayout.classes.mpl.get_backend", lambda: "QtAgg")
+        monkeypatch.setattr(scifig.canvas, "manager", None)
+        with pytest.raises(RuntimeError, match="window manager"):
+            scifig.set_location(10, 20)
+
     def test_qt_backend_moves_window_keeping_its_size(self, scifig, monkeypatch):
         calls = []
         window = SimpleNamespace(

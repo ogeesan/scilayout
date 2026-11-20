@@ -1,6 +1,7 @@
 """Shared test configuration."""
 
 from collections.abc import Generator
+from pathlib import Path
 
 import matplotlib
 
@@ -11,6 +12,35 @@ import pytest
 
 import scilayout
 from scilayout import style
+
+OUTPUTS = Path(__file__).parent.parent / "test_outputs"
+
+
+def pytest_addoption(parser: pytest.Parser) -> None:
+    parser.addoption(
+        "--keep-outputs",
+        action="store_true",
+        default=False,
+        help="Write the figures some tests create (SVG and PNG) to test_outputs/ "
+        "so they can be looked at. Without it they go to a temporary folder.",
+    )
+
+
+@pytest.fixture(scope="session")
+def output_dir(
+    request: pytest.FixtureRequest, tmp_path_factory: pytest.TempPathFactory
+) -> Path:
+    """Where tests put figures: ``test_outputs/`` with --keep-outputs, else temporary."""
+    if request.config.getoption("--keep-outputs"):
+        OUTPUTS.mkdir(exist_ok=True)
+        return OUTPUTS
+    return tmp_path_factory.mktemp("outputs")
+
+
+def pytest_report_header(config: pytest.Config) -> str | None:
+    if config.getoption("--keep-outputs"):
+        return f"keeping test figures in {OUTPUTS}"
+    return None
 
 
 @pytest.fixture(autouse=True)

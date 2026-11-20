@@ -1,5 +1,6 @@
 """Movable scalebars for matplotlib plots."""
 
+import warnings
 from typing import Any
 
 import numpy as np
@@ -8,6 +9,7 @@ from matplotlib.lines import Line2D
 from matplotlib.text import Text
 
 from . import style
+from ._utils import find_stack_level
 from .classes import PanelAxes
 
 
@@ -16,6 +18,31 @@ def _check_coord_system(coord_system: str) -> None:
     if coord_system not in ("fraction", "data", "cm"):
         msg = f"coordSystem must be 'fraction', 'data' or 'cm', not {coord_system!r}"
         raise ValueError(msg)
+
+
+def _open_gap(
+    x_locs: list[float], y_locs: list[float], gap: float
+) -> tuple[list[float], list[float]]:
+    """Split a line in two, leaving ``gap`` (data units) empty around its middle.
+
+    The two halves are joined by a NaN so they stay a single matplotlib line. If the
+    gap is at least as long as the line, nothing is drawn: zero-length pieces would
+    still show as dots because of the line's projecting caps.
+    """
+    (x0, x1), (y0, y1) = x_locs, y_locs
+    length = float(np.hypot(x1 - x0, y1 - y0))
+    if length == 0:
+        return x_locs, y_locs
+    ux, uy = (x1 - x0) / length, (y1 - y0) / length
+    nan = float("nan")
+    if gap >= length:
+        return [nan, nan], [nan, nan]
+    half = gap / 2
+    mx, my = (x0 + x1) / 2, (y0 + y1) / 2
+    return (
+        [x0, mx - ux * half, nan, mx + ux * half, x1],
+        [y0, my - uy * half, nan, my + uy * half, y1],
+    )
 
 
 class ScaleBar:
@@ -57,9 +84,13 @@ class ScaleBar:
         :type orientation: str, optional
         :param coordSystem: Units of the xy position. 'fraction' (default), 'data' or 'cm'
         :type coordSystem: str, optional
-        :param hpos: Horizontal position of the text. Behaviour depends on orientation
+        :param hpos: Horizontal position of the text. Behaviour depends on orientation.
+            For a vertical bar: 'left' (default), 'right' or 'center'. 'center' puts the
+            text in the middle of the bar, with a gap in the bar around the text
         :type hpos: str
-        :param vpos: Vertical position of the text. Behaviour depends on orientation
+        :param vpos: Vertical position of the text. Behaviour depends on orientation.
+            For a horizontal bar: 'bottom' (default), 'top' or 'center'. 'center' puts
+            the text in the middle of the bar, with a gap in the bar around the text
         :type vpos: str
         :param textstring: Text to display on the scalebar. Defaults to the length and unit
         :type textstring: str
@@ -79,14 +110,14 @@ class ScaleBar:
         if orientation == "h":
             if vpos is None:
                 vpos = "bottom"
-            if vpos not in ("top", "bottom"):
-                msg = f"vpos must be 'top' or 'bottom', not {vpos!r}"
+            if vpos not in ("top", "center", "bottom"):
+                msg = f"vpos must be 'top', 'center' or 'bottom', not {vpos!r}"
                 raise ValueError(msg)
         else:
             if hpos is None:
                 hpos = "left"
-            if hpos not in ("left", "right"):
-                msg = f"hpos must be 'left' or 'right', not {hpos!r}"
+            if hpos not in ("left", "center", "right"):
+                msg = f"hpos must be 'left', 'center' or 'right', not {hpos!r}"
                 raise ValueError(msg)
         vpos = vpos if vpos is not None else "center"
         hpos = hpos if hpos is not None else "center"
@@ -124,20 +155,11 @@ class ScaleBar:
     def _initialise_scalebar(self, x: float, y: float) -> None:
         """Initialise the scalebar and text objects."""
         if self.orientation == "h":
-            if self.vpos == "top":
-                va = "bottom"
-            elif self.vpos == "bottom":
-                va = "top"
-            else:
-                va = "center"
+            # text sits on the opposite side of its anchor to the bar
+            va = {"top": "bottom", "bottom": "top", "center": "center"}[self.vpos]
             text_kwargs: dict[str, Any] = {"ha": self.hpos, "va": va}
         else:
-            if self.hpos == "left":
-                ha = "right"
-            elif self.hpos == "right":
-                ha = "left"
-            else:
-                ha = "center"
+            ha = {"left": "right", "right": "left", "center": "center"}[self.hpos]
             text_kwargs = {"rotation": 90, "ha": ha, "va": self.vpos}
 
         text_xpos, text_ypos = 0, 0
@@ -202,30 +224,33 @@ class ScaleBar:
 
         # Convert text width to data coordinates
         inv_transform = self.ax.transData.inverted()
+        gap = 0.0  # length of bar left empty around text centred on the bar
         if self.orientation == "h":
             text_xpos, text_ypos = np.mean(x_locs), y_locs[0]
-            if self.vpos == "top":
-                text_ypos = (
-                    text_ypos + text_height_data * self.text_pixel_pad_proportion
-                )
-            elif self.vpos == "bottom":
-                text_ypos = (
-                    text_ypos - text_height_data * self.text_pixel_pad_proportion
-                )
-            elif self.vpos == "center":
-                pass
+            pad = text_height_data * self.text_pixel_pad_proportion
+            if self.vpos == "center":
+                gap = abs(text_width_data) + 2 * abs(pad)
             else:
-                raise ValueError(f"Unknown vertical alignment: {self.vpos}")
-        elif self.orientation == "v":
-            text_xpos, text_ypos = x_locs[0], np.mean(y_locs)
-            if self.hpos == "left":
-                text_xpos = text_xpos - text_width_data * self.text_pixel_pad_proportion
-            elif self.hpos == "right":
-                text_xpos = text_xpos + text_width_data * self.text_pixel_pad_proportion
-            else:
-                raise ValueError(f"Unknown horizontal alignment: {self.hpos}")
+                text_ypos = text_ypos + pad if self.vpos == "top" else text_ypos - pad
         else:
-            raise ValueError(f"Unknown orientation: {self.orientation}")
+            text_xpos, text_ypos = x_locs[0], np.mean(y_locs)
+            pad = text_width_data * self.text_pixel_pad_proportion
+            if self.hpos == "center":
+                gap = abs(text_height_data) + 2 * abs(pad)
+            else:
+                text_xpos = text_xpos + pad if self.hpos == "right" else text_xpos - pad
+
+        if gap > 0:
+            bar_length = float(np.hypot(x_locs[1] - x_locs[0], y_locs[1] - y_locs[0]))
+            if 0 < bar_length <= gap:
+                warnings.warn(
+                    f"The text {self.text.get_text()!r} needs {gap:.3g} data units "
+                    f"but the scale bar is only {bar_length:.3g} long, so the bar is "
+                    "hidden. Shorten the text, lengthen the bar or move the text off "
+                    "the bar.",
+                    stacklevel=find_stack_level(),
+                )
+            x_locs, y_locs = _open_gap(x_locs, y_locs, gap)
 
         self.text.set_position((float(text_xpos), float(text_ypos)))
         self.line.set_xdata(x_locs)

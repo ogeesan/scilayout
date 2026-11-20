@@ -26,7 +26,7 @@ defaultstyles = {
     "panellabel.fontstyle": "normal",
     "panellabel.fontweight": "bold",
     "panellabel.xoffset": -0.5,
-    "panellabel.yoffset": -0.1,
+    "panellabel.yoffset": -0.3,
     "scalebars.fontsize": 8,
     "scalebars.linewidth": 1,
     "stats.linecolor": "black",

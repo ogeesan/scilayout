@@ -112,3 +112,10 @@ class TestCMTransform:
         )
         assert width > 0
         assert height > 0
+
+
+class TestLocationCmToPosition:
+    @pytest.mark.parametrize("corners", [(5, 1, 1, 4), (1, 5, 4, 1)])
+    def test_misordered_corners_raise(self, fig, corners):
+        with pytest.raises(ValueError, match="less than"):
+            locationcm_to_position(fig, corners)
