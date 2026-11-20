@@ -1,6 +1,7 @@
 name: Matplotlib Compatibility Tests
 
-# Runs the tests against the newest and the oldest supported matplotlib and numpy.
+# Runs the tests against the oldest supported, several in-between and the newest matplotlib.
+# `just compat` runs the same versions locally.
 # The regular Tests workflow uses the versions pinned in uv.lock.
 
 on:
@@ -24,12 +25,30 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: Newest matplotlib and numpy
-            python-version: "3.13"
-            install: --upgrade matplotlib numpy
-          - name: Oldest supported matplotlib and numpy
+          - name: matplotlib 3.5.0
             python-version: "3.10"
-            install: matplotlib==3.5.0 numpy==1.21.3
+            install: 'matplotlib==3.5.0 numpy==1.21.3'
+          - name: matplotlib 3.5.3
+            python-version: "3.10"
+            install: 'matplotlib==3.5.3 "numpy<2"'
+          - name: matplotlib 3.6.3
+            python-version: "3.10"
+            install: 'matplotlib==3.6.3 "numpy<2"'
+          - name: matplotlib 3.7.5
+            python-version: "3.10"
+            install: 'matplotlib==3.7.5 "numpy<2"'
+          - name: matplotlib 3.8.4
+            python-version: "3.10"
+            install: 'matplotlib==3.8.4 "numpy<2"'
+          - name: matplotlib 3.9.4
+            python-version: "3.10"
+            install: 'matplotlib==3.9.4'
+          - name: matplotlib 3.10.5
+            python-version: "3.10"
+            install: 'matplotlib==3.10.5'
+          - name: matplotlib newest (with newest numpy)
+            python-version: "3.13"
+            install: '--upgrade matplotlib numpy'
     env:
       MPLBACKEND: Agg
     steps:
