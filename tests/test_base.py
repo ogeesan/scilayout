@@ -16,32 +16,6 @@ class TestSetFigureSizeCm:
         assert tuple(scifig.get_size_inches()) == pytest.approx((8 / 2.54, 6 / 2.54))
 
 
-class TestCreatePanelLocations:
-    def test_shape(self):
-        result = base.create_panel_locations(0, 0, 10, 10, (2, 3))
-        assert result.shape == (2, 3, 4)
-
-    def test_single_panel_fills_the_area(self):
-        result = base.create_panel_locations(1, 2, 11, 12, (1, 1))
-        assert result[0, 0] == pytest.approx([1, 2, 11, 12])
-
-    def test_panels_are_separated_by_padding(self):
-        result = base.create_panel_locations(0, 0, 10.5, 4, (1, 2), pad=0.5)
-        left, right = result[0, 0], result[0, 1]
-        assert left == pytest.approx([0, 0, 5, 4])
-        assert right == pytest.approx([5.5, 0, 10.5, 4])
-
-    def test_rows_are_stacked_downwards(self):
-        result = base.create_panel_locations(0, 0, 4, 10.5, (2, 1), pad=0.5)
-        assert result[0, 0] == pytest.approx([0, 0, 4, 5])
-        assert result[1, 0] == pytest.approx([0, 5.5, 4, 10.5])
-
-    @pytest.mark.parametrize("npanels", [(0, 1), (1, 0), (-1, 2)])
-    def test_non_positive_panel_count_raises(self, npanels):
-        with pytest.raises(ValueError, match="positive"):
-            base.create_panel_locations(0, 0, 10, 10, npanels)
-
-
 class TestAddCmOverlayGrid:
     def test_returns_axes_and_three_collections(self, scifig):
         ax, one, half, five = base.add_cm_overlay_grid(scifig)

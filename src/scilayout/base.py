@@ -67,66 +67,6 @@ def create_panel_label(
     )
 
 
-# TODO: determine if this is required
-def create_panel_locations(
-    x1: float,
-    y1: float,
-    x2: float,
-    y2: float,
-    npanels: tuple[int, int],
-    pad: float = 0.5,
-) -> np.ndarray:
-    """Find locations of panels.
-
-    Parameters
-    ----------
-    x1 : float
-        Left x location.
-    y1 : float
-        Top y location.
-    x2 : float
-        Right x location.
-    y2 : float
-        Bottom y location.
-    npanels : tuple of int
-        Number of panels as (rows, columns).
-    pad : float
-        Padding between panels.
-
-    Returns
-    -------
-    numpy.ndarray
-        Array of shape (rows, columns, 4) holding the (x0, y0, x1, y1) extent of each
-        panel.
-
-    Raises
-    ------
-    ValueError
-        If the number of rows or columns is not positive.
-
-    """
-    if not (npanels[0] > 0 and npanels[1] > 0):
-        msg = "panels must be positive integers"
-        raise ValueError(msg)
-
-    # initialise numpy array object
-    panel_array = np.zeros((*npanels, 4), dtype=float)
-
-    height = (y2 - y1 - (npanels[0] - 1) * pad) / npanels[0]
-    width = (x2 - x1 - (npanels[1] - 1) * pad) / npanels[1]
-    for idx in range(npanels[0]):
-        for jdx in range(npanels[1]):
-            location = (
-                x1 + jdx * (width + pad),
-                y1 + idx * (height + pad),
-                x1 + jdx * (width + pad) + width,
-                y1 + idx * (height + pad) + height,
-            )
-            panel_array[idx, jdx] = location
-
-    return panel_array
-
-
 def savefigure(
     fig: Figure,
     fpath: Path | str,
