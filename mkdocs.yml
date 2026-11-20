@@ -31,6 +31,45 @@ theme:
     - content.code.copy # allow codeblock copying
     - content.code.annotate
 
+nav:
+  - Home: index.md
+  - Locations and coordinates: coordinates.md
+  - API reference:
+      - Overview: reference/index.md
+      - Classes: reference/classes.md
+      - Scale bars: reference/scalebars.md
+      - Stats lines: reference/stats.md
+      - Style: reference/style.md
+      - Locations: reference/locations.md
+      - Types: reference/types.md
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          inventories:
+            - https://docs.python.org/3/objects.inv
+            - https://matplotlib.org/stable/objects.inv
+            - https://numpy.org/doc/stable/objects.inv
+          options:
+            docstring_style: numpy
+            docstring_options:
+              ignore_init_summary: true
+            merge_init_into_class: true
+            members_order: source
+            filters: public
+            show_root_heading: true
+            show_root_full_path: false
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            show_signature_annotations: true
+            separate_signature: true
+            signature_crossrefs: true
+            show_source: false
+            heading_level: 2
+
 markdown_extensions:
   # Admonitions (callout boxes)
   - admonition

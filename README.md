@@ -18,13 +18,17 @@ There are many guides for Matplotlib styling for scientific publication, and the
 
 ```python
 import scilayout
+
 fig = scilayout.figure()  # it's a matplotlib figure like plt.figure()
 
-myax = fig.add_panel((1, 1, 5, 5))  # creates a panel with position specified in cm
+# creates a 5 x 5 cm panel with its upper left corner 1 cm from the left and 1 cm from the top
+myax = fig.add_panel((1, 1, 5, 5), method="bounds")  # (x, y, width, height)
 
 # %%
-myax.set_location((2, 10, 5, 3), method='size')  # move the panel after it's been created and set it's location and dimensions based on size (5x3cm dimensions from 2cm down and 10 cm left)
-
+# move the panel after it's been created: now 5 x 3 cm, 2 cm from the left and 10 cm from the top
+myax.set_location((2, 10, 5, 3), method="bounds")
+# or give the upper left and lower right corners (x0, y0, x1, y1) instead
+myax.set_location((2, 10, 7, 13), method="extent")
 ```
 
 This package is designed for people with:

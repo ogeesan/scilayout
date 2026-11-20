@@ -1,7 +1,28 @@
-"""Type definitions for scilayout."""
+"""Types for locations on a figure.
 
-from dataclasses import dataclass
+Rectangles are described either by their corners, an [`Extent`][scilayout.types.Extent]
+(``x0, y0, x1, y1``), or by their origin and size, a [`Bound`][scilayout.types.Bound]
+(``x, y, w, h``). The ``...CM``, ``...Inches`` and ``...Fraction`` names are aliases that
+say which unit is meant. They are the same classes, so the unit is documentation only.
+For cm the origin is the upper left of the figure.
+"""
+
+from numbers import Real
 from typing import NamedTuple
+
+__all__ = [
+    "Bound",
+    "BoundCM",
+    "BoundFraction",
+    "BoundInches",
+    "Extent",
+    "ExtentCM",
+    "ExtentFraction",
+    "ExtentInches",
+    "centimetres",
+    "fraction",
+    "inches",
+]
 
 centimetres = float
 """A type alias for centimeters, used for positions and dimensions in figures."""
@@ -11,31 +32,89 @@ fraction = float
 """A type alias for figure fraction, used for positions and dimensions in figures."""
 
 
-@dataclass
-class Extent(NamedTuple):
-    """A named tuple to hold extent (positions of corners) coordinates."""
-
+class _ExtentFields(NamedTuple):
     x0: float
     y0: float
     x1: float
     y1: float
 
-    def __post_init__(self) -> None:
-        """Ensure that the coordinates are in the correct order."""
-        if not all(
-            isinstance(coord, (int, float))
-            for coord in (self.x0, self.y0, self.x1, self.y1)
-        ):
+
+class Extent(_ExtentFields):
+    """Extent of a rectangle given by its corners (x0, y0, x1, y1).
+
+    An immutable 4-tuple with named fields, checked on creation: all values must be
+    real numbers, ``x0 <= x1`` and ``y0 <= y1``. Note that ``_replace`` does not
+    repeat the checks.
+
+    Attributes
+    ----------
+    x0, y0 : float
+        One corner (the upper left, for locations in cm).
+    x1, y1 : float
+        The opposite corner.
+
+    Examples
+    --------
+    >>> extent = Extent(1, 2, 5, 6)
+    >>> extent.x1
+    5
+    >>> x0, y0, x1, y1 = extent
+    >>> Extent(5, 0, 1, 1)
+    Traceback (most recent call last):
+        ...
+    ValueError: Coordinates must be in the order: (x0, y0, x1, y1).
+
+    """
+
+    __slots__ = ()
+
+    def __new__(cls, x0: float, y0: float, x1: float, y1: float) -> "Extent":
+        """Create an Extent, checking the coordinates are numeric and ordered.
+
+        Parameters
+        ----------
+        x0, y0 : float
+            One corner.
+        x1, y1 : float
+            The opposite corner.
+
+        Raises
+        ------
+        TypeError
+            If a coordinate is not a real number.
+        ValueError
+            If ``x0 > x1`` or ``y0 > y1``.
+
+        """
+        if not all(isinstance(c, Real) for c in (x0, y0, x1, y1)):
             msg = "Coordinates must be numeric (int or float)."
             raise TypeError(msg)
-
-        if self.x0 > self.x1 or self.y0 > self.y1:
+        if x0 > x1 or y0 > y1:
             msg = "Coordinates must be in the order: (x0, y0, x1, y1)."
             raise ValueError(msg)
+        return super().__new__(cls, x0, y0, x1, y1)
 
 
 class Bound(NamedTuple):
-    """A named tuple to hold bounding box (width, height) coordinates."""
+    """Rectangle given by its origin and size (x, y, w, h).
+
+    An immutable 4-tuple with named fields. Unlike [`Extent`][scilayout.types.Extent] it is not checked
+    on creation.
+
+    Attributes
+    ----------
+    x, y : float
+        The origin (the upper left, for locations in cm).
+    w, h : float
+        Width and height.
+
+    Examples
+    --------
+    >>> bound = Bound(1, 2, 4, 4)
+    >>> bound.w
+    4
+
+    """
 
     x: float
     y: float
@@ -43,46 +122,15 @@ class Bound(NamedTuple):
     h: float
 
 
-class ExtentCM(Extent):
-    """A named tuple to hold extent (position) coordinates."""
-
-    x0: centimetres
-    y0: centimetres
-    x1: centimetres
-    y1: centimetres
-
-
-class BoundCM(Bound):
-    """A named tuple to hold bounding box (width, height) coordinates."""
-
-    x: centimetres
-    y: centimetres
-    w: centimetres
-    h: centimetres
-
-
-class ExtentInches(Extent):
-    """A named tuple to hold extent (position) coordinates in inches."""
-
-    x0: inches
-    y0: inches
-    x1: inches
-    y1: inches
-
-
-class BoundInches(Bound):
-    """A named tuple to hold bounding box (width, height) coordinates in inches."""
-
-    x: inches
-    y: inches
-    w: inches
-    h: inches
-
-
-class ExtentFraction(Extent):
-    """A named tuple to hold extent (position) coordinates in figure fraction."""
-
-    x0: fraction
-    y0: fraction
-    x1: fraction
-    y1: fraction
+ExtentCM = Extent
+"""Extent (x0, y0, x1, y1) in centimetres from the upper left of the figure."""
+BoundCM = Bound
+"""Bound (x, y, w, h) in centimetres from the upper left of the figure."""
+ExtentInches = Extent
+"""Extent (x0, y0, x1, y1) in inches."""
+BoundInches = Bound
+"""Bound (x, y, w, h) in inches."""
+ExtentFraction = Extent
+"""Extent (x0, y0, x1, y1) in figure fraction."""
+BoundFraction = Bound
+"""Bound (x, y, w, h) in figure fraction."""

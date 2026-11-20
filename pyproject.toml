@@ -8,7 +8,7 @@ dynamic = ["version"]
 authors = [{ name = "George Stuyt" }]
 description = "Create axes from top left of figure in centimetres to simplify scientific figure generation."
 dependencies = ["matplotlib", "numpy"]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 readme = "README.md"
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
@@ -33,6 +33,8 @@ classifiers = [
 [project.urls]
 Repository = "https://github.com/ogeesan/scilayout.git"
 Issues = "https://github.com/ogeesan/scilayout/issues"
+Changelog = "https://github.com/ogeesan/scilayout/blob/main/CHANGELOG.md"
+Documentation = "https://ogeesan.github.io/scilayout/"
 # homepage = 
 
 [tool.setuptools.packages.find]
@@ -44,34 +46,58 @@ exclude = ["tests*"]
 version = { attr = "scilayout.__version__" }
 
 [tool.ruff.lint]
-select = ["ALL"]
+select = [
+    "E", "W",  # pycodestyle
+    "F",       # pyflakes
+    "I",       # import sorting
+    "UP",      # pyupgrade
+    "B",       # bugbear
+    "C4",      # comprehensions
+    "SIM",     # simplifications
+    "RUF",     # ruff-specific
+    "NPY",     # numpy
+    "D",       # docstrings
+    "ANN",     # type annotations
+]
 ignore = [
-    "EXE",     # executable rules
-    "FBT001",  # positional boolean kwarg
-    "FBT002",  # positional boolean kwarg
-    "PLR0913", # too many arguments for a function
-    "TD",      # the formats of todos
+    "D203",    # conflicts with D211
+    "D213",    # conflicts with D212
+    "ANN401",  # Any is acceptable for style values
+    "E501",    # line length is left to the formatter; long docstring lines are ok
     "RUF013",  # implicit optional
-    "UP025",   # deprecation warning for importing Tuple from typing
-    "SLF001",  # Accessing private method
-    "SIM105",  # use contextlib instead of try/except
-    "FIX002",  # line contains TODO
 ]
 
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
 [tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]  # re-exports
 "tests/*" = [
     "D",    # docstring
     "ANN",  # type annotations
-    "S101", # assert
 ]
+
+[tool.pytest.ini_options]
+addopts = "--strict-markers"
+markers = [
+    "visual: writes figures (SVG and PNG) to look at; added automatically to any test that uses the output_dir fixture. Run them with `pytest -m visual --keep-outputs`.",
+]
+
+[tool.pyright]
+include = ["src", "tests"]
+pythonVersion = "3.10"
+typeCheckingMode = "standard"
 
 [dependency-groups]
 dev = [
     "defusedxml>=0.7.1",
     "ipython>=8.12.3",
-    "mkdocs-material>=9.6.20",
-    "pyqt5==5.15.11",          # windows compatibility
-    "pyqt5-qt5==5.15.2",       # windows compatibility
+    "mkdocstrings[python]>=1.0.6",
+    "pyqt5==5.15.11; sys_platform == 'win32'",          # windows compatibility
+    "pyqt5-qt5==5.15.2; sys_platform == 'win32'",       # windows compatibility
+    "pyright>=1.1.414",
     "pytest>=8.4.2",
     "pytest-cov>=7.0.0",
+    "ruff>=0.17.6",
+    "zensical>=0.0.52",
 ]

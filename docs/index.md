@@ -1,7 +1,3 @@
----
-hide:
-  - navigation
----
 # scilayout
 <!-- ![Image of scilayout](../social-media-preview.svg) -->
 
@@ -15,13 +11,18 @@ The idea is to make and interact with Matplotlib axes in centimetres from the to
 # Create a figure object
 >>> fig = scilayout.figure()
 
-# Create a panel, specifying location in cm from top left
->>> myax = fig.add_panel((1, 1, 5, 5))
+# Create a panel, specifying location (x, y, width, height) in cm from top left
+>>> myax = fig.add_panel((1, 1, 5, 5), method="bounds")
 
-# move the panel after it's been created and set it's location based on size
->>> myax.set_location((2, 10, 3, 3), method='size')
+# move the panel after it's been created
+>>> myax.set_location((2, 10, 3, 3), method="bounds")
+
+# or use corners (x0, y0, x1, y1)
+>>> myax.set_location((2, 10, 5, 13), method="extent")
 
 ```
+
+Next: how scilayout describes [locations and coordinates](coordinates.md), and the [API reference](reference/index.md).
 
 ## Why use this?
 
@@ -58,9 +59,9 @@ You are ready to use scilayout when you are able to write a function that takes 
 ```python
 def mydataplot(ax, data):
     ax.plot(data.x, data.y)
-    ax.set_title('My glorious title')
-    ax.set_xlabel('Time spent learning matplotlib')
-    ax.set_ylabel('Time required to create suitable graphs')
+    ax.set_title("My glorious title")
+    ax.set_xlabel("Time spent learning matplotlib")
+    ax.set_ylabel("Time required to create suitable graphs")
 ```
 
 ### Downsides to using Python to make your figures

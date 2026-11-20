@@ -1,18 +1,29 @@
-"""Base plotting functions for use in scientific plotting."""
+"""Base plotting functions for use in scientific plotting.
 
+Internal: this module is not part of the public API and may change without notice.
+Use [`scilayout.SciFigure.export`][scilayout.classes.SciFigure.export] to save a figure.
+"""
+
+import logging
 from pathlib import Path
+from typing import cast
 
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.axes import Axes
+from matplotlib.collections import PathCollection
+from matplotlib.figure import Figure
+from matplotlib.text import Text
 
 from . import locations, style
 
+logger = logging.getLogger(__name__)
+
 
 def create_panel_label(
-    ax: mpl.axes.Axes,
+    ax: Axes,
     text: str,
-) -> mpl.text.Text:
+) -> Text:
     """Add a panel label in figure fraction coordinates.
 
     Parameters
@@ -49,67 +60,19 @@ def create_panel_label(
         text,
         fontfamily=style.params["panellabel.font"],
         fontweight=style.params["panellabel.fontweight"],
+        fontstyle=style.params["panellabel.fontstyle"],
         size=style.params["panellabel.fontsize"],
         label="_nolegend_",  # Don't include in legend
-        transform=ax.get_figure().transFigure,
+        transform=cast("Figure", ax.get_figure()).transFigure,
     )
 
 
-# TODO: determine if this is required
-def create_panel_locations(
-    x1: float,
-    y1: float,
-    x2: float,
-    y2: float,
-    npanels: tuple[int, int],
-    pad: float = 0.5,
-) -> np.ndarray:
-    """Find locations of panels.
-
-    :param x1: Left x location
-    :type x1: float
-    :param y1: Top y location
-    :type y1: float
-    :param x2: Right x location
-    :type x2: float
-    :param y2: Bottom y location
-    :type y2: float
-    :param npanels: Number of divisions
-    :type npanels: Tuple[int, int]
-    :param pad: padding between each
-    :type pad: float
-    :return: Array containing coordinates for each panel
-    :rtype: numpy.typing.ndarray
-    """
-    # Ruff doesn't like assert
-    if not (npanels[0] > 0 and npanels[1] > 0):
-        msg = "panels must be positive integers"
-        raise ValueError(msg)
-
-    # initialise numpy array object
-    panel_array = np.zeros((*npanels, 4), dtype=float)
-
-    height = (y2 - y1 - (npanels[0] - 1) * pad) / npanels[0]
-    width = (x2 - x1 - (npanels[1] - 1) * pad) / npanels[1]
-    for idx in range(npanels[0]):
-        for jdx in range(npanels[1]):
-            location = (
-                x1 + jdx * (width + pad),
-                y1 + idx * (height + pad),
-                x1 + jdx * (width + pad) + width,
-                y1 + idx * (height + pad) + height,
-            )
-            panel_array[idx, jdx] = location
-
-    return panel_array
-
-
 def savefigure(
-    fig: mpl.figure.Figure,
-    fpath: Path,
+    fig: Figure,
+    fpath: Path | str,
     dpi: float = 300.0,
     transparent_png: bool = True,
-    bbox: str = "tight",
+    bbox: str | None = "tight",
     allow_overwrite: bool = True,
 ) -> None:
     """Save figure using settings optimised for version control and document embedding.
@@ -126,8 +89,9 @@ def savefigure(
         Dots per inch, default 300
     transparent_png : bool
         Make png output transparent, default True
-    bbox : str
-        Bounding box to use for pdf and eps output, default 'tight'
+    bbox : str or None
+        Bounding box method passed to matplotlib's ``bbox_inches``, default 'tight'.
+        Use None to keep the full figure size.
     allow_overwrite : bool, optional
         Allow overwriting of an existing file at fpath, default True.
 
@@ -136,7 +100,7 @@ def savefigure(
         fpath = Path(fpath)
     if fpath.exists():
         if allow_overwrite:
-            print(f"Overwriting {fpath}")  # TODO: use logging to display messages
+            logger.info("Overwriting %s", fpath)
         else:
             msg = f"{fpath} already exists, set allow_overwrite=True to overwrite"
             raise FileExistsError(msg)
@@ -176,14 +140,14 @@ def savefigure(
 
 
 def add_cm_overlay_grid(
-    figure: mpl.figure.Figure,
+    figure: Figure,
     width_cm: float | None = None,
     height_cm: float | None = None,
 ) -> tuple[
-    mpl.axes.Axes,
-    mpl.collections.PathCollection,
-    mpl.collections.PathCollection,
-    mpl.collections.PathCollection,
+    Axes,
+    PathCollection,
+    PathCollection,
+    PathCollection,
 ]:
     """Add an overlay to view the cm size of all items on the figure.
 
@@ -204,13 +168,13 @@ def add_cm_overlay_grid(
     """
     # Allow user to specify what the position is meant to be
     # rather than what it actually is
-    width_cm_actual, height_cm_actual = locations.inch_to_cm(figure.get_size_inches())
-    width_cm = width_cm_actual if width_cm is None else width_cm
-    height_cm = height_cm_actual if height_cm is None else height_cm
+    size_cm = locations.inch_to_cm(figure.get_size_inches())
+    width_cm = float(size_cm[0]) if width_cm is None else width_cm
+    height_cm = float(size_cm[1]) if height_cm is None else height_cm
 
     # Create an axes spanning the entire grid
     ax = figure.add_axes(
-        [0, 0, 1, 1],
+        (0, 0, 1, 1),
         label="cm_overlay",
         frameon=False,
     )  # No axis lines
@@ -219,8 +183,8 @@ def add_cm_overlay_grid(
     )  # Make the zoom/panning interactive tool not apply to this axes
 
     # Set limits to match the cm size of the figure
-    ax.set_ylim([0, height_cm])
-    ax.set_xlim([0, width_cm])
+    ax.set_ylim((0, height_cm))
+    ax.set_xlim((0, width_cm))
     ax.invert_yaxis()  # invert y origin to be upper to match the coordinate system
 
     # Generate positions of each cm marker
@@ -252,7 +216,7 @@ def add_cm_overlay_grid(
 
 
 def set_figure_size_cm(
-    fig: mpl.figure.Figure,
+    fig: Figure,
     w: float,
     h: float,
 ) -> None:
