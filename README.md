@@ -1,5 +1,5 @@
-![Pepy Total Downloads](https://img.shields.io/pepy/dt/scilayout) [![Coverage Status](https://coveralls.io/repos/github/ogeesan/scilayout/badge.svg?branch=main)](https://coveralls.io/github/ogeesan/scilayout?branch=main)
-[![EffVer Versioning](https://img.shields.io/badge/version_scheme-EffVer-0097a7)](https://jacobtomlinson.dev/effver)
+[![PyPI version](https://img.shields.io/pypi/v/scilayout)](https://pypi.org/project/scilayout/) [![Tests](https://github.com/ogeesan/scilayout/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/ogeesan/scilayout/actions/workflows/tests.yml) ![Pepy Total Downloads](https://img.shields.io/pepy/dt/scilayout) [![Coverage Status](https://coveralls.io/repos/github/ogeesan/scilayout/badge.svg?branch=main)](https://coveralls.io/github/ogeesan/scilayout?branch=main)
+[![matplotlib 3.5+](https://img.shields.io/badge/matplotlib-%E2%89%A5%203.5-blue)](https://matplotlib.org) [![Compatibility](https://github.com/ogeesan/scilayout/actions/workflows/compat.yml/badge.svg?branch=main)](https://github.com/ogeesan/scilayout/actions/workflows/compat.yml) [![EffVer Versioning](https://img.shields.io/badge/version_scheme-EffVer-0097a7)](https://jacobtomlinson.dev/effver)
 
 # What is `scilayout`?
 
