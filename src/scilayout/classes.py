@@ -430,7 +430,6 @@ class PanelAxes(Axes):
             Vertical alignment of the text.
 
         """
-        # TODO: allow for more complexity at inisitalisation (especially x/y offsets, positions)
         if self.panellabel is not None:
             self.panellabel.text.set_text(label)
         else:
@@ -463,8 +462,8 @@ class PanelLabel:
 
     The 'anchor position' is the top left corner of the associated PanelAxes.
 
-    To change the properties of the text, use the ``text`` attribute directly,
-    for example ``panellabel.text.set_horizontal_alignment("right")``.
+    To change a label after creating it, set its offset and alignment, or use the
+    ``text`` attribute directly, for example ``panellabel.text.set_fontsize(10)``.
 
     Attributes
     ----------
@@ -476,6 +475,16 @@ class PanelLabel:
         Vertical offset from the panel's upper left corner, in cm.
     text : matplotlib.text.Text
         The text object.
+
+    Examples
+    --------
+    Create a panel with a label, then move the label and align it to its right edge:
+
+    >>> import scilayout
+    >>> fig = scilayout.figure()
+    >>> ax = fig.add_panel((3, 2, 4, 3), method="bounds", panellabel="a")
+    >>> ax.panellabel.set_offset(x=-0.8, y=-0.4)  # cm from the panel's corner
+    >>> ax.panellabel.set_alignment(h="right")
 
     """
 
