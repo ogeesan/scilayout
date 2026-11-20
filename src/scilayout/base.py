@@ -1,5 +1,6 @@
 """Base plotting functions for use in scientific plotting."""
 
+import logging
 from pathlib import Path
 from typing import cast
 
@@ -11,6 +12,8 @@ from matplotlib.figure import Figure
 from matplotlib.text import Text
 
 from . import locations, style
+
+logger = logging.getLogger(__name__)
 
 
 def create_panel_label(
@@ -85,7 +88,6 @@ def create_panel_locations(
     :return: Array containing coordinates for each panel
     :rtype: numpy.typing.ndarray
     """
-    # Ruff doesn't like assert
     if not (npanels[0] > 0 and npanels[1] > 0):
         msg = "panels must be positive integers"
         raise ValueError(msg)
@@ -113,7 +115,7 @@ def savefigure(
     fpath: Path | str,
     dpi: float = 300.0,
     transparent_png: bool = True,
-    bbox: str = "tight",
+    bbox: str | None = "tight",
     allow_overwrite: bool = True,
 ) -> None:
     """Save figure using settings optimised for version control and document embedding.
@@ -130,8 +132,9 @@ def savefigure(
         Dots per inch, default 300
     transparent_png : bool
         Make png output transparent, default True
-    bbox : str
-        Bounding box to use for pdf and eps output, default 'tight'
+    bbox : str or None
+        Bounding box method passed to matplotlib's ``bbox_inches``, default 'tight'.
+        Use None to keep the full figure size.
     allow_overwrite : bool, optional
         Allow overwriting of an existing file at fpath, default True.
 
@@ -140,7 +143,7 @@ def savefigure(
         fpath = Path(fpath)
     if fpath.exists():
         if allow_overwrite:
-            print(f"Overwriting {fpath}")  # TODO: use logging to display messages
+            logger.info("Overwriting %s", fpath)
         else:
             msg = f"{fpath} already exists, set allow_overwrite=True to overwrite"
             raise FileExistsError(msg)

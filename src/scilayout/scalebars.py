@@ -11,6 +11,13 @@ from . import style
 from .classes import PanelAxes
 
 
+def _check_coord_system(coord_system: str) -> None:
+    """Raise ValueError if the coordinate system is not recognised."""
+    if coord_system not in ("fraction", "data", "cm"):
+        msg = f"coordSystem must be 'fraction', 'data' or 'cm', not {coord_system!r}"
+        raise ValueError(msg)
+
+
 class ScaleBar:
     """Scale bar for matplotlib plots.
 
@@ -62,23 +69,35 @@ class ScaleBar:
         :type fontsize: int
         """
         # Sort out orientations
-        orientation = "h" if orientation in ["horizontal", "h"] else "v"
-        assert orientation in ["h", "v"], "orientation must be 'h' or 'v'"
+        if orientation in ("horizontal", "h"):
+            orientation = "h"
+        elif orientation in ("vertical", "v"):
+            orientation = "v"
+        else:
+            msg = f"orientation must be 'h' or 'v', not {orientation!r}"
+            raise ValueError(msg)
         if orientation == "h":
             if vpos is None:
                 vpos = "bottom"
-            assert vpos in ["top", "bottom"], "Unknown vertical alignment"
+            if vpos not in ("top", "bottom"):
+                msg = f"vpos must be 'top' or 'bottom', not {vpos!r}"
+                raise ValueError(msg)
         else:
             if hpos is None:
                 hpos = "left"
-            assert hpos in ["left", "right"], "Unknown horizontal alignment"
+            if hpos not in ("left", "right"):
+                msg = f"hpos must be 'left' or 'right', not {hpos!r}"
+                raise ValueError(msg)
         vpos = vpos if vpos is not None else "center"
         hpos = hpos if hpos is not None else "center"
 
-        assert coordSystem in ["fraction", "data", "cm"], "Unknown units"
-        assert transform in ["transAxes", "transData"], "Unknown transform"
+        _check_coord_system(coordSystem)
+        if transform not in ("transAxes", "transData"):
+            msg = f"transform must be 'transAxes' or 'transData', not {transform!r}"
+            raise ValueError(msg)
         if transform == "transAxes":
-            raise NotImplementedError("transAxes not yet implemented")
+            msg = "transAxes not yet implemented"
+            raise NotImplementedError(msg)
 
         self.ax = ax
         self.xypos = xy
@@ -158,7 +177,7 @@ class ScaleBar:
         :type coordSystem: str, optional
         """
         coordSystem = self.coordSystem if coordSystem is None else coordSystem
-        assert coordSystem in ["fraction", "data", "cm"], "Unknown units"
+        _check_coord_system(coordSystem)
 
         self._update_appearance()
 
@@ -231,7 +250,6 @@ class ScaleBar:
         if coordSystem == "fraction":
             x, y = self.ax.transAxes.transform((x, y))
             x, y = self.ax.transData.inverted().transform((x, y))
-            print(f"Fractional coordinates: {x}, {y}")
         elif coordSystem == "cm":
             if not isinstance(self.ax, PanelAxes):
                 msg = "coordSystem 'cm' requires the scalebar axes to be a PanelAxes"

@@ -116,6 +116,10 @@ def use(
 
 
 def reset() -> None:
-    """Reset the parameters to the default values."""
-    for key in params:
-        params[key] = defaultstyles[key]
+    """Reset the parameters to the default values.
+
+    Parameters added with ``params._setitem_bypass`` are removed.
+    """
+    params.clear()
+    for key, value in defaultstyles.items():
+        params._setitem_bypass(key, value)

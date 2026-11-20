@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import contextlib
+import warnings
 from pathlib import Path
 from typing import Any, cast
 
@@ -127,12 +128,13 @@ class SciFigure(figure.Figure):
         if self.grid is None:
             self.grid = GuideGridClass(self, **kwargs)
         else:
-            # if kwargs are given print warning of
+            # if kwargs are given warn that
             # changing settings with this function is not implemented
             if kwargs:
                 # TODO: implement changing grid settings
-                print(
-                    "Warning: Setting grid settings with draw_grid() is not implemented.",
+                warnings.warn(
+                    "Setting grid settings with draw_grid() is not implemented.",
+                    stacklevel=2,
                 )
             self.grid.show()
 
@@ -164,23 +166,23 @@ class SciFigure(figure.Figure):
         # TODO: add support for other backends
 
         backend = mpl.get_backend()
-        manager = self.canvas.manager
-        if manager is None:
-            msg = "Figure has no window manager (is the backend interactive?)"
-            raise RuntimeError(msg)
-        window = manager.window  # pyright: ignore[reportAttributeAccessIssue]
 
         if method != "px":
             # TODO: add support for method='fraction' and 'cm'?
             msg = 'Only method="px" is implemented'
             raise NotImplementedError(msg)
 
-        if backend.startswith("Qt"):
-            _, _, dx, dy = window.geometry().getRect()
-            window.setGeometry(x, y, dx, dy)
-        else:
+        if not backend.startswith("Qt"):
             msg = f"Backend {backend} not implemented. Submit issue to add suport."
             raise NotImplementedError(msg)
+
+        manager = self.canvas.manager
+        if manager is None:
+            msg = "Figure has no window manager"
+            raise RuntimeError(msg)
+        window = manager.window  # pyright: ignore[reportAttributeAccessIssue]
+        _, _, dx, dy = window.geometry().getRect()
+        window.setGeometry(x, y, dx, dy)
 
     def export(self, savepath: Path | str, **kwargs: Any) -> None:
         """Export the figure to a file.
