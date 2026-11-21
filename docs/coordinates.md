@@ -76,4 +76,15 @@ ax.get_location().x1  # 6.0
 
 [`scilayout.locations`][scilayout.locations] has the conversions that scilayout uses itself.
 For example, [`cm_to_fraction`][scilayout.locations.cm_to_fraction] and [`fraction_to_cm`][scilayout.locations.fraction_to_cm] move between cm from the upper left and matplotlib's figure fraction.
-[`CMTransform`][scilayout.locations.CMTransform] is a matplotlib transform from cm to figure fractions.
+
+## Placing artists in cm
+
+`fig.transCM` is a matplotlib transform from cm (from the upper left) to the figure.
+Pass it as `transform` to place any artist in cm, the way you would use `ax.transAxes`:
+
+```python
+fig.text(2, 1, "2 cm across, 1 cm down", transform=fig.transCM)
+```
+
+It follows the figure when its size changes, and combines with other transforms.
+[`CMTransform`][scilayout.locations.CMTransform] is the same transform but ends at figure fractions, so `CMTransform(fig) + fig.transFigure` is equivalent to `fig.transCM`.

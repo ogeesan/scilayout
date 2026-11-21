@@ -5,6 +5,24 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Fixed
+
+- `CMTransform` and its inverse can be combined with other matplotlib transforms.
+  Previously `fig.transCM + fig.transFigure` placed artists in the wrong position, because the transforms did not implement matplotlib's transform protocol.
+  They are now affine transforms that also follow the figure when its size or dpi changes.
+  Their output is unchanged.
+
+### Changed
+
+- `fig.transCM` now ends at display coordinates instead of figure fractions, so `transform=fig.transCM` places an artist in cm, like `transform=ax.transAxes`.
+  Before, it was the same as `CMTransform(fig)` and the position came out wrong unless it was followed by `fig.transFigure`.
+  To get figure fractions, use `CMTransform(fig)`.
+
+### Deprecated
+
+- `scilayout.locations.InvertedCMTransform` as a public name, which will be removed in 1.0.
+  Use `CMTransform(fig).inverted()` to get the inverse transform.
+
 ### Development
 
 - Images for the README and documentation are built from scripts in `examples/` when the docs are built, and the tests run those scripts.
