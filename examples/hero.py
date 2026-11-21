@@ -10,11 +10,11 @@ from scilayout import FigureText, LinkedScaleBar, ScaleBar, StatsLine
 
 FORMATS = ("png",)
 DATA = Path(__file__).parent / "data"
+RNG = np.random.default_rng(1)
 
 
 def make() -> scilayout.SciFigure:
     """Build the figure."""
-    rng = np.random.default_rng(1)
     fig = scilayout.figure()
     fig.set_size_cm(16, 6.5)
 
@@ -27,7 +27,7 @@ def make() -> scilayout.SciFigure:
     plot_hockey_stick(panel_a)
     ScaleBar(panel_a, (-50, -0.6), 0.5, "°C", orientation="v", coordSystem="data")
 
-    plot_groups(panel_b, rng)
+    plot_groups(panel_b)
     StatsLine(panel_b, 0.93, 0, 1)
     panel_b.text(
         0.5,
@@ -39,7 +39,7 @@ def make() -> scilayout.SciFigure:
         fontsize=8,
     )
 
-    plot_decay(panel_c, rng)
+    plot_decay(panel_c)
     LinkedScaleBar(
         panel_c, (11, 4.5), 10, 3, x_unit="min", y_unit="a.u.", coordSystem="data"
     )
@@ -47,10 +47,8 @@ def make() -> scilayout.SciFigure:
     # Actually, change your mind about the panel sizes and move them around a bit. The figure will update automatically.
     panel_a.set_location((2.1, 1.5, 6.2, 3.5), method="bounds")
 
-    # scale bars in the upper left corner: the figure is measured in cm from there
-    add_cm_ruler(fig)
-
     # Sugar for the reader
+    add_cm_ruler(fig)
     FigureText(
         2.0,
         0.25,
@@ -85,7 +83,15 @@ def add_cm_ruler(fig: scilayout.SciFigure, length: float = 1) -> None:
     ruler.scatter(x.ravel(), y.ravel(), c=colours, marker="o", s=2, linewidths=0)
 
     LinkedScaleBar(
-        ruler, (0.5, 0.5), length, length, "cm", "cm", coordSystem="data", hat="left", vat="top"
+        ruler,
+        (0.5, 0.5),
+        length,
+        length,
+        "cm",
+        "cm",
+        coordSystem="data",
+        hat="left",
+        vat="top",
     )
 
 
@@ -109,12 +115,12 @@ def plot_hockey_stick(ax: Axes) -> None:
     ax.set_xlabel("Year", fontsize=8)
 
 
-def plot_groups(ax: Axes, rng: np.random.Generator) -> None:
+def plot_groups(ax: Axes) -> None:
     """Plot two groups as bars with their individual points (made-up data)."""
-    groups = {"control": rng.normal(4.0, 0.8, 8), "treated": rng.normal(6.0, 0.8, 8)}
+    groups = {"control": RNG.normal(4.0, 0.8, 8), "treated": RNG.normal(6.0, 0.8, 8)}
     for i, values in enumerate(groups.values()):
         ax.bar(i, values.mean(), color=["#9e9e9e", "#d95f02"][i], width=0.7)
-        jitter = rng.normal(0, 0.07, values.size)
+        jitter = RNG.normal(0, 0.07, values.size)
         ax.scatter(i + jitter, values, s=6, color="k", zorder=3)
     ax.set_xticks(range(2), list(groups), rotation=0, ha="center")
     ax.set_xlim(-0.6, 1.6)
@@ -124,10 +130,10 @@ def plot_groups(ax: Axes, rng: np.random.Generator) -> None:
     ax.tick_params(labelsize=8)
 
 
-def plot_decay(ax: Axes, rng: np.random.Generator) -> None:
+def plot_decay(ax: Axes) -> None:
     """Plot a noisy exponential decay without axes (made-up data)."""
     x = np.linspace(0, 30, 200)
-    y = 8 * np.exp(-x / 8) + 0.2 * rng.standard_normal(x.size)
+    y = 8 * np.exp(-x / 8) + 0.2 * RNG.standard_normal(x.size)
     ax.plot(x, y, color="#66b492", linewidth=1)
     ax.set_xlim(0, 30)
     ax.set_ylim(-1, 9)
