@@ -58,6 +58,11 @@ scilayout = ["py.typed"]
 [tool.setuptools.dynamic]
 version = { attr = "scilayout.__version__" }
 
+[tool.ruff.format]
+# ruff can format python code blocks in Markdown, which rewrites the snippet includes
+# (--8<-- "file.py") in the docs into the comparison "--8 < --"file.py""
+exclude = ["*.md"]
+
 [tool.ruff.lint]
 select = [
     "E", "W",  # pycodestyle
