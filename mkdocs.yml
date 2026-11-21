@@ -73,6 +73,8 @@ plugins:
 markdown_extensions:
   # Admonitions (callout boxes)
   - admonition
+  # Collapsible blocks (???)
+  - pymdownx.details
   # Annotations
   - attr_list
   - md_in_html

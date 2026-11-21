@@ -5,6 +5,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Development
+
+- Images for the README and documentation are built from scripts in `examples/` when the docs are built, and the tests run those scripts.
+
 ## [0.2.1] - 2026-11-21
 
 This release states which versions of matplotlib and numpy scilayout supports, and tests them.

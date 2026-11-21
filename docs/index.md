@@ -5,6 +5,17 @@ Scilayout is a Python package to assist in making multi-panel scientific figures
 It aims to make laying out figures easy, fast, and maybe even fun.
 The idea is to make and interact with Matplotlib axes in centimetres from the top left, which when combined with existing interactive plotting tools makes building plots in Python a breeze.
 
+![A figure with three panels: traces with scale bars, a bar chart with a significance line, and a decay curve with linked scale bars](images/hero.png)
+
+Panel a is the global mean temperature over the Common Era from the [PAGES2k Consortium reconstruction](https://doi.org/10.1038/s41561-019-0400-0) (Neukom et al., 2019).
+The data in panels b and c are made up.
+
+??? example "Code for this figure"
+
+    ```python
+    --8<-- "examples/hero.py"
+    ```
+
 ```python title="Example usage"
 >>> import scilayout
 
