@@ -61,7 +61,12 @@ def make() -> scilayout.SciFigure:
     return fig
 
 
-def add_cm_ruler(fig: scilayout.SciFigure, length: float = 1) -> None:
+def add_cm_ruler(
+    fig: scilayout.SciFigure,
+    length: float = 1,
+    solid: float = 2.5,
+    fade_length: float = 4.5,
+) -> None:
     """Show that the figure is measured in cm from the upper left.
 
     Adds a grid of dots every 0.5 cm that fades out with distance from the upper left
@@ -75,9 +80,9 @@ def add_cm_ruler(fig: scilayout.SciFigure, length: float = 1) -> None:
     ruler.set_ylim(height, 0)
     ruler.set_zorder(-1)  # behind the panels
 
-    # a dot every 0.5 cm: solid within 2.5 cm of the corner, then fading to nothing
+    # a dot every 0.5 cm: solid within ``solid`` cm of the corner, then fading over ``fade_length`` cm
     x, y = np.meshgrid(np.arange(0, width, 0.5), np.arange(0, height, 0.5))
-    fade = np.clip(1 - (np.hypot(x, y) - 2.5) / 4.5, 0, 1).ravel() ** 1.5
+    fade = np.clip(1 - (np.hypot(x, y) - solid) / fade_length, 0, 1).ravel() ** 1.5
     colours = np.zeros((fade.size, 4))
     colours[:, 3] = fade
     ruler.scatter(x.ravel(), y.ravel(), c=colours, marker="o", s=2, linewidths=0)
