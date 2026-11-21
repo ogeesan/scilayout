@@ -1,12 +1,19 @@
-[![PyPI version](https://img.shields.io/pypi/v/scilayout)](https://pypi.org/project/scilayout/) [![Tests](https://github.com/ogeesan/scilayout/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/ogeesan/scilayout/actions/workflows/tests.yml) ![Pepy Total Downloads](https://img.shields.io/pepy/dt/scilayout) [![Coverage Status](https://coveralls.io/repos/github/ogeesan/scilayout/badge.svg?branch=main)](https://coveralls.io/github/ogeesan/scilayout?branch=main)
-[![matplotlib 3.5+](https://img.shields.io/badge/matplotlib-%E2%89%A5%203.5-blue)](https://matplotlib.org) [![Compatibility](https://github.com/ogeesan/scilayout/actions/workflows/compat.yml/badge.svg?branch=main)](https://github.com/ogeesan/scilayout/actions/workflows/compat.yml) [![EffVer Versioning](https://img.shields.io/badge/version_scheme-EffVer-0097a7)](https://jacobtomlinson.dev/effver)
+[![PyPI version](https://img.shields.io/pypi/v/scilayout)](https://pypi.org/project/scilayout/)
+[![Tests](https://github.com/ogeesan/scilayout/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/ogeesan/scilayout/actions/workflows/tests.yml)
+![Pepy Total Downloads](https://img.shields.io/pepy/dt/scilayout)
+[![Coverage Status](https://coveralls.io/repos/github/ogeesan/scilayout/badge.svg?branch=main)](https://coveralls.io/github/ogeesan/scilayout?branch=main)
+[![matplotlib 3.5+](https://img.shields.io/badge/matplotlib-%E2%89%A5%203.5-blue)](https://matplotlib.org)
+[![Compatibility](https://github.com/ogeesan/scilayout/actions/workflows/compat.yml/badge.svg?branch=main)](https://github.com/ogeesan/scilayout/actions/workflows/compat.yml)
+![Python Version from PEP 621 TOML](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Fogeesan%2Fscilayout%2Fmain%2Fpyproject.toml)
+[![EffVer Versioning](https://img.shields.io/badge/version_scheme-EffVer-0097a7)](https://jacobtomlinson.dev/effver)
+
 
 # What is `scilayout`?
 
 > [!WARNING]  
 > This package is in beta.
 
-`pip install scilayout`
+`pip install scilayout` / `uv add scilayout`
 
 Scilayout is a Python package to make creating multi-panel scientific figures easier, faster, and maybe a little bit more fun. The core idea is to build figures using coordinates in **centimetres from the top left** using interactive plotting. This approach has a few main benefits:
 
