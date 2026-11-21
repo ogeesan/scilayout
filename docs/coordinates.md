@@ -2,16 +2,13 @@
 
 Scilayout places things on a figure in **centimetres from its upper left corner**, the way you would measure a layout on a page, instead of in matplotlib's figure fractions.
 
-```text
-(0, 0) ───────────────▶ x   (cm, to the right)
-  │
-  │      a panel at x = 2, y = 1
-  │        ┌─────────┐
-  │        │         │ height
-  ▼        └─────────┘
-  y            width
-(cm, downwards)
-```
+![A 12 by 7 cm figure with a centimetre grid, showing the x axis pointing right and the y axis pointing down from the upper left corner, and a panel at (1.5, 1.5) that is 4.5 cm wide and 2.5 cm high](images/coordinates.svg)
+
+??? example "Code for this figure"
+
+    ```python
+    --8<-- "examples/coordinates.py"
+    ```
 
 - The origin is the **upper left** of the figure.
 - `y` increases **downwards**.

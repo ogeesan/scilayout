@@ -62,12 +62,16 @@ compat:
 # Lint, type check and tests
 check: lint typecheck test
 
+# Build the images in docs/images/ from the scripts in examples/
+images:
+    uv run python scripts/build_images.py
+
 # Serve docs locally
-docs:
+docs: images
     uv run zensical serve
 
 # Build docs, failing on warnings and on unresolved cross-references
-docs-build:
+docs-build: images
     uv run zensical build --strict --clean
     uv run python scripts/check_site.py
 

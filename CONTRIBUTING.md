@@ -22,6 +22,7 @@ The ones you will use most:
 | `just cov` | Run the tests and show uncovered lines. |
 | `just visual` | Run the visual tests and keep their SVG and PNG output in `test_outputs/` to look at. |
 | `just compat` | Run the tests against several matplotlib versions (needs network). |
+| `just images` | Build the README and documentation images from the scripts in `examples/`. |
 | `just docs` | Serve the documentation locally. |
 | `just docs-build` | Build the documentation and fail on warnings or broken cross-references. |
 

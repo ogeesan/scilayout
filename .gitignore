@@ -154,3 +154,6 @@ cython_debug/
 
 # SVGs written by tests for visual inspection
 test_outputs/
+
+# Images built from docs/examples/ for the README and docs
+docs/images/

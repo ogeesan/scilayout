@@ -16,6 +16,11 @@ Scilayout is a Python package to make creating multi-panel scientific figures ea
 
 There are many guides for Matplotlib styling for scientific publication, and there are a number of packages that make this process easier (e.g. [SciencePlots](https://github.com/garrettj403/SciencePlots)), but this `scilayout` supports the creation of figures which are 100% ready for embedding in documents.
 
+![A figure with three panels laid out with scilayout](https://ogeesan.github.io/scilayout/images/hero.png)
+
+Panel a is the global mean temperature over the Common Era from the [PAGES2k Consortium reconstruction](https://doi.org/10.1038/s41561-019-0400-0) (Neukom et al., 2019).
+The data in panels b and c are made up.
+
 ```python
 import scilayout
 
