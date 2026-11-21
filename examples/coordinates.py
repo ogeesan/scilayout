@@ -5,7 +5,6 @@ from typing import Any
 import matplotlib.patches as patches
 
 import scilayout
-from scilayout.locations import CMTransform
 
 FORMATS = ("svg",)
 
@@ -23,15 +22,12 @@ def make() -> scilayout.SciFigure:
     ax.set_yticks([])
     fig.draw_grid(major_interval=5, minor_interval=1)
 
-    cm = CMTransform(fig)
-
     def arrow(start: tuple[float, float], end: tuple[float, float]) -> None:
         fig.add_artist(
             patches.FancyArrowPatch(
-                *cm.transform(
-                    [start, end]
-                ),  # cm from the upper left -> figure fraction
-                transform=fig.transFigure,
+                start,
+                end,
+                transform=fig.transCM,  # cm from the upper left
                 arrowstyle="-|>",
                 mutation_scale=8,
                 color=ORANGE,
@@ -41,9 +37,9 @@ def make() -> scilayout.SciFigure:
 
     def label(xy: tuple[float, float], text: str, **kwargs: Any) -> None:
         fig.text(
-            *cm.transform([xy])[0],
+            *xy,
             text,
-            transform=fig.transFigure,
+            transform=fig.transCM,
             color=ORANGE,
             fontsize=8,
             **kwargs,

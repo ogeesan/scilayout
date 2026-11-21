@@ -35,8 +35,10 @@ class SciFigure(figure.Figure):
     ----------
     grid : GuideGridClass
         Handler for the guide grid. Internal, use [`draw_grid`][scilayout.classes.SciFigure.draw_grid].
-    transCM : scilayout.locations.CMTransform
-        Transform from cm (upper left origin) to figure fraction.
+    transCM : matplotlib.transforms.Transform
+        Transform from cm (upper left origin) to display coordinates, so it can be
+        passed as ``transform=`` to place any artist in cm. Follows the figure when it
+        is resized. See [`CMTransform`][scilayout.locations.CMTransform] for figure fractions.
 
     Examples
     --------
@@ -68,7 +70,7 @@ class SciFigure(figure.Figure):
         # must initialise before super because it'll call clear
         self.grid = GuideGridClass(self)
         super().__init__(*args, **kwargs)
-        self.transCM = locations.CMTransform(self)
+        self.transCM = locations.CMTransform(self) + self.transFigure
 
     def set_size_cm(self, w: float, h: float) -> None:
         """Set size of figure in cm.

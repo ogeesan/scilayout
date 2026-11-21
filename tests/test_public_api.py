@@ -125,7 +125,6 @@ class TestPublicModules:
             "style": {"StyleDictionary", "defaultstyles", "params", "reset", "use"},
             "locations": {
                 "CMTransform",
-                "InvertedCMTransform",
                 "LocationMethod",
                 "cm_to_fraction",
                 "cm_to_inch",

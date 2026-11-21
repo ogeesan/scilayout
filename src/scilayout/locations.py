@@ -7,15 +7,13 @@ from typing import Any, Literal, overload
 
 import matplotlib.figure
 import numpy as np
-from matplotlib.transforms import Transform
-from numpy.typing import ArrayLike
+from matplotlib.transforms import Affine2DBase
 
 from ._utils import find_stack_level
 from .types import Bound, Extent, ExtentCM, centimetres
 
 __all__ = [
     "CMTransform",
-    "InvertedCMTransform",
     "LocationMethod",
     "cm_to_fraction",
     "cm_to_inch",
@@ -245,15 +243,27 @@ def fraction_to_cm(
 
 
 # --- Classes ---
-class CMTransform(Transform):
+class CMTransform(Affine2DBase):
     """Convert coordinates from centimeters to figure fractions.
 
     Works on a Matplotlib figure, with the origin at the upper left.
-    """
+    The output is a figure fraction, so to place an artist with it, follow it with
+    ``fig.transFigure``, which turns fractions into display coordinates.
 
-    input_dims = 2  # pyright: ignore[reportAssignmentType, reportIncompatibleMethodOverride]
-    output_dims = 2  # pyright: ignore[reportAssignmentType, reportIncompatibleMethodOverride]
-    has_inverse = True  # pyright: ignore[reportAssignmentType, reportIncompatibleMethodOverride]
+    It is a matplotlib affine transform, so it combines with other transforms and
+    follows the figure when it is resized.
+
+    Examples
+    --------
+    >>> import scilayout
+    >>> fig = scilayout.figure()
+    >>> fig.set_size_cm(10, 5)
+    >>> cm = scilayout.locations.CMTransform(fig)
+    >>> cm.transform((0, 0))  # the upper left corner
+    array([0., 1.])
+    >>> text = fig.text(2, 1, "2 cm across, 1 cm down", transform=cm + fig.transFigure)
+
+    """
 
     def __init__(self, fig: matplotlib.figure.Figure) -> None:
         """Initialize the CMTransform.
@@ -266,44 +276,68 @@ class CMTransform(Transform):
         """
         super().__init__()
         self.fig = fig
+        # transFigure changes when the figure is resized: depend on it to know when
+        # the matrix is out of date, including inside transforms combined with this one
+        self.set_children(fig.transFigure)
+        self._mtx: np.ndarray = np.identity(3)
 
-    def transform(self, values: ArrayLike) -> np.ndarray:
-        """Transform cm coordinates (upper left origin) to figure fractions."""
-        inch_coords = np.array(values) / 2.54
-        figwidth, figheight = self.fig.get_size_inches()
-        x, y = inch_coords.T
-        return np.array([x / figwidth, 1 - (y / figheight)]).T  # flip y
+    def get_matrix(self) -> np.ndarray:
+        """Return the 3 x 3 matrix for the figure's current size."""
+        if self._invalid:
+            width, height = np.asarray(self.fig.get_size_inches()) * 2.54
+            self._mtx = np.array(
+                [[1 / width, 0, 0], [0, -1 / height, 1], [0, 0, 1]]
+            )  # flip y
+            self._invalid = 0
+        return self._mtx
 
-    def inverted(self) -> InvertedCMTransform:
+    def inverted(self) -> _InvertedCMTransform:  # pyright: ignore[reportIncompatibleMethodOverride]
         """Return the inverse transform."""
-        return InvertedCMTransform(self.fig)
+        return _InvertedCMTransform(self.fig)
 
 
-class InvertedCMTransform(Transform):
-    """Convert figure fractions to centimeters (upper left origin)."""
+class _InvertedCMTransform(Affine2DBase):
+    """Convert figure fractions to centimeters (upper left origin).
 
-    input_dims = 2  # pyright: ignore[reportAssignmentType, reportIncompatibleMethodOverride]
-    output_dims = 2  # pyright: ignore[reportAssignmentType, reportIncompatibleMethodOverride]
-    has_inverse = True  # pyright: ignore[reportAssignmentType, reportIncompatibleMethodOverride]
+    Get one with ``CMTransform(fig).inverted()``.
+    """
 
-    def __init__(
-        self, fig: matplotlib.figure.Figure, *args: Any, **kwargs: Any
-    ) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(self, fig: matplotlib.figure.Figure) -> None:
+        """Initialize the inverse transform.
+
+        Parameters
+        ----------
+        fig : matplotlib.figure.Figure
+            The figure to calculate the transform on.
+
+        """
+        super().__init__()
         self.fig = fig
+        self.set_children(fig.transFigure)
+        self._mtx: np.ndarray = np.identity(3)
 
-    def transform(self, values: ArrayLike) -> np.ndarray:
-        """Transform figure fractions to cm coordinates (upper left origin)."""
-        # Convert figure coordinates to inches
-        figwidth, figheight = self.fig.get_size_inches()
-        x, y = np.array(values).T
-        inch_coords = np.array(
-            [x * figwidth, (1 - y) * figheight],
-        ).T  # Flip y-axis back
+    def get_matrix(self) -> np.ndarray:
+        """Return the 3 x 3 matrix for the figure's current size."""
+        if self._invalid:
+            width, height = np.asarray(self.fig.get_size_inches()) * 2.54
+            self._mtx = np.array([[width, 0, 0], [0, -height, height], [0, 0, 1]])
+            self._invalid = 0
+        return self._mtx
 
-        # Convert inches to cm
-        return inch_coords * 2.54
-
-    def inverted(self) -> CMTransform:
+    def inverted(self) -> CMTransform:  # pyright: ignore[reportIncompatibleMethodOverride]
         """Return the inverse transform."""
         return CMTransform(self.fig)
+
+
+def __getattr__(name: str) -> Any:
+    """Keep the old public name of the inverse transform working, with a warning."""
+    if name == "InvertedCMTransform":
+        warnings.warn(
+            "InvertedCMTransform is deprecated and will be removed in scilayout "
+            f"{REMOVAL_VERSION}, use CMTransform(fig).inverted() instead.",
+            FutureWarning,
+            stacklevel=find_stack_level(),
+        )
+        return _InvertedCMTransform
+    msg = f"module {__name__!r} has no attribute {name!r}"
+    raise AttributeError(msg)

@@ -68,7 +68,27 @@ class TestSciFigure:
 
     def test_cm_transform_matches_figure_size(self, scifig):
         # 13 x 10 cm: the upper right corner is (13, 0) cm
-        assert tuple(scifig.transCM.transform((13, 0))) == pytest.approx((1, 1))
+        width, height = scifig.bbox.width, scifig.bbox.height
+        assert tuple(scifig.transCM.transform((13, 0))) == pytest.approx(
+            (width, height)
+        )
+
+    def test_cm_transform_places_artists(self, scifig):
+        text = scifig.text(2, 3, "x", transform=scifig.transCM)
+        scifig.canvas.draw()
+        x, y = text.get_transform().transform(text.get_position())
+        assert x / scifig.bbox.width == pytest.approx(2 / 13)
+        assert y / scifig.bbox.height == pytest.approx(1 - 3 / 10)
+
+    def test_cm_transform_follows_a_resize(self, scifig):
+        scifig.set_size_cm(26, 20)
+        width, height = scifig.bbox.width, scifig.bbox.height
+        assert tuple(scifig.transCM.transform((13, 10))) == pytest.approx(
+            (width / 2, height / 2)
+        )
+        assert tuple(scifig.transCM.inverted().transform((width, 0))) == pytest.approx(
+            (26, 20)
+        )
 
 
 class TestWindowLocation:

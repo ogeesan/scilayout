@@ -101,6 +101,15 @@ class TestCMTransform:
         assert fractions[1] == pytest.approx([1, 0])
         assert transform.inverted().transform(fractions) == pytest.approx(points)
 
+    def test_old_name_of_the_inverse_is_deprecated(self, fig):
+        from scilayout import locations
+
+        with pytest.warns(FutureWarning, match=r"CMTransform\(fig\).inverted\(\)"):
+            old = locations.InvertedCMTransform
+        assert isinstance(CMTransform(fig).inverted(), old)
+        with pytest.raises(AttributeError):
+            locations.NoSuchThing  # noqa: B018
+
     def test_inverse_of_inverse(self, fig):
         transform = CMTransform(fig)
         assert isinstance(transform.inverted().inverted(), CMTransform)
@@ -131,3 +140,56 @@ class TestPrecision:
         for xy in [(0.5, 0.5), (3.3, 4.7), (15.0, 10.0)]:
             back = fraction_to_cm(fig, cm_to_fraction(fig, xy))
             assert back == pytest.approx(xy, abs=1e-12)
+
+
+class TestCMTransformComposition:
+    """The transform combines with matplotlib's own transforms and follows the figure."""
+
+    def test_composes_with_transfigure(self, fig):
+        cm = CMTransform(fig)
+        composite = cm + fig.transFigure
+        points = np.array([[0, 0], [3, 4], [15.24, 10.16]])
+        expected = fig.transFigure.transform(cm.transform(points))
+        assert composite.transform(points) == pytest.approx(expected)
+        # the upper left of the figure is the top of the window
+        assert composite.transform((0, 0)) == pytest.approx((0, fig.bbox.height))
+
+    def test_places_text(self, fig):
+        text = fig.text(3, 4, "x", transform=CMTransform(fig) + fig.transFigure)
+        fig.canvas.draw()
+        x, y = text.get_transform().transform(text.get_position())
+        assert x / fig.bbox.width == pytest.approx(3 / 15.24)
+        assert y / fig.bbox.height == pytest.approx(1 - 4 / 10.16)
+
+    def test_follows_a_resize(self, fig):
+        cm = CMTransform(fig)
+        composite = cm + fig.transFigure
+        before = composite.transform((3, 4))
+        fig.set_size_inches(12, 8)
+        # 3 cm from the left and 4 cm from the top, whatever the size
+        assert composite.transform((3, 4)) == pytest.approx(
+            (3 / 2.54 * fig.dpi, fig.bbox.height - 4 / 2.54 * fig.dpi)
+        )
+        assert cm.transform((15.24, 10.16)) == pytest.approx((0.5, 0.5))
+        assert not np.allclose(before, composite.transform((3, 4)))
+
+    def test_follows_a_dpi_change(self, fig):
+        composite = CMTransform(fig) + fig.transFigure
+        fig.set_dpi(200)
+        assert composite.transform((2.54, 0)) == pytest.approx((200, fig.bbox.height))
+
+    def test_inverse_of_composite(self, fig):
+        composite = CMTransform(fig) + fig.transFigure
+        points = np.array([[1, 2], [7.5, 3.25]])
+        assert composite.inverted().transform(composite.transform(points)) == (
+            pytest.approx(points)
+        )
+
+    def test_inverted_transform_composes_too(self, fig):
+        to_cm = fig.transFigure.inverted() + CMTransform(fig).inverted()
+        assert to_cm.transform((fig.bbox.width, 0)) == pytest.approx((15.24, 10.16))
+
+    def test_single_points_and_arrays(self, fig):
+        cm = CMTransform(fig)
+        assert cm.transform((0, 0)).shape == (2,)
+        assert cm.transform([[0, 0], [1, 1]]).shape == (2, 2)
