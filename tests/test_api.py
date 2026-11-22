@@ -62,6 +62,14 @@ class TestMethods:
         panel = fig.add_panel((1, 2, 5, 6), method="extent")
         assert panel.get_location() == pytest.approx((1, 2, 5, 6))
 
+    def test_extent_dict_is_accepted(self, fig):
+        panel = fig.add_panel({"x0": 1, "y0": 2, "x1": 5, "y1": 6})
+        assert panel.get_location() == pytest.approx((1, 2, 5, 6))
+
+    def test_bounds_dict_is_accepted(self, fig):
+        panel = fig.add_panel({"x": 1, "y": 2, "width": 5, "height": 6})
+        assert panel.get_location() == pytest.approx((1, 2, 6, 8))
+
     @pytest.mark.parametrize(
         ("old", "new"),
         [("size", "bounds"), ("bbox", "extent")],

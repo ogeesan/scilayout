@@ -86,7 +86,10 @@ def resolve_method(method: str | None) -> LocationMethod:
     raise ValueError(msg)
 
 
-def to_extent(location: tuple[float, ...], method: LocationMethod) -> ExtentCM:
+from .types import Models
+
+
+def to_extent(location: tuple[float, ...] | Models, method: LocationMethod) -> ExtentCM:
     """Convert a 4-tuple location in cm to an extent (corners).
 
     A [`Bound`][scilayout.types.Bound] or [`Extent`][scilayout.types.Extent] instance
@@ -111,6 +114,16 @@ def to_extent(location: tuple[float, ...], method: LocationMethod) -> ExtentCM:
         width or height is negative.
 
     """
+    if isinstance(location, Models):
+        if isinstance(location, ExtentModel):
+            return ExtentCM(location.x0, location.y0, location.x1, location.y1)
+        else:
+            return ExtentCM(
+                location.x,
+                location.y,
+                location.x + location.width,
+                location.y + location.height,
+            )
     if isinstance(location, Extent):
         return location
     if len(location) != 4:

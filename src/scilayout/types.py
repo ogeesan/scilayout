@@ -10,6 +10,8 @@ For cm the origin is the upper left of the figure.
 from numbers import Real
 from typing import NamedTuple
 
+from pydantic import BaseModel
+
 __all__ = [
     "Bound",
     "BoundCM",
@@ -30,6 +32,33 @@ inches = float
 """A type alias for inches, used for positions and dimensions in figures."""
 fraction = float
 """A type alias for figure fraction, used for positions and dimensions in figures."""
+
+
+class BoundsModel(BaseModel):
+    """A pydantic model for bounds (x, y, w, h) in cm.
+
+    This is used for validating bounds passed as a dictionary.
+    """
+
+    x: float
+    y: float
+    width: float
+    height: float
+
+
+class ExtentModel(BaseModel):
+    """A pydantic model for extent (x0, y0, x1, y1) in cm.
+
+    This is used for validating extent passed as a dictionary.
+    """
+
+    x0: float
+    y0: float
+    x1: float
+    y1: float
+
+
+Models = BoundsModel | ExtentModel
 
 
 class _ExtentFields(NamedTuple):
@@ -94,6 +123,10 @@ class Extent(_ExtentFields):
             raise ValueError(msg)
         return super().__new__(cls, x0, y0, x1, y1)
 
+    def to_bound(self) -> "Bound":
+        """Convert to a [`Bound`][scilayout.types.Bound] (origin and size)."""
+        return Bound(self.x0, self.y0, self.x1 - self.x0, self.y1 - self.y0)
+
 
 class Bound(NamedTuple):
     """Rectangle given by its origin and size (x, y, w, h).
@@ -120,6 +153,10 @@ class Bound(NamedTuple):
     y: float
     w: float
     h: float
+
+    def to_extent(self) -> Extent:
+        """Convert to an [`Extent`][scilayout.types.Extent] (corners)."""
+        return Extent(self.x, self.y, self.x + self.w, self.y + self.h)
 
 
 ExtentCM = Extent
