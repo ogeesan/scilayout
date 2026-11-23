@@ -34,6 +34,7 @@ theme:
 nav:
   - Home: index.md
   - Locations and coordinates: coordinates.md
+  - Testing and compatibility: testing.md
   - API reference:
       - Overview: reference/index.md
       - Classes: reference/classes.md
