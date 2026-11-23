@@ -57,13 +57,21 @@ jobs:
           # Only main saves the uv cache, pull requests just read it
           save-cache: ${{ github.ref == 'refs/heads/main' }}
           python-version: ${{ matrix.python-version }}
-      - run: uv sync --locked
+      - name: Install with the lockfile
+        if: ${{ matrix.python-version != '3.10' }}
+        run: uv sync --locked
+      # uv.lock only covers Python 3.11+ (see [tool.uv] environments in pyproject.toml)
+      - name: Install without the lockfile (Python 3.10)
+        if: ${{ matrix.python-version == '3.10' }}
+        run: |
+          uv venv
+          uv pip install -e . --group dev
       - name: Run tests
         if: ${{ !matrix.coverage }}
-        run: uv run pytest
+        run: uv run --no-sync pytest
       - name: Run tests with coverage
         if: ${{ matrix.coverage }}
-        run: uv run pytest --cov=scilayout --cov-report=xml
+        run: uv run --no-sync pytest --cov=scilayout --cov-report=xml
       - name: Upload coverage to Coveralls
         if: ${{ matrix.coverage }}
         uses: coverallsapp/github-action@8d6379e14d29928660c4ba802d8e85393440b329 # v2.3.8

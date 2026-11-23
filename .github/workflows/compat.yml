@@ -2,7 +2,7 @@ name: Matplotlib Compatibility Tests
 
 # Runs the tests against the oldest supported, several in-between and the newest matplotlib.
 # `just compat` runs the same versions locally.
-# The regular Tests workflow uses the versions pinned in uv.lock.
+# The regular Tests workflow uses the versions pinned in uv.lock (except on Python 3.10).
 
 on:
   schedule:
@@ -58,7 +58,11 @@ jobs:
       - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           python-version: ${{ matrix.python-version }}
-      - run: uv sync --locked
+      # uv.lock only covers Python 3.11+ (see [tool.uv] environments in pyproject.toml),
+      # so install without it
+      - run: |
+          uv venv
+          uv pip install -e . --group dev
       - name: Install ${{ matrix.name }}
         run: uv pip install ${{ matrix.install }}
       - run: uv pip list | grep -iE "^(matplotlib|numpy) "
