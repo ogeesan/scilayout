@@ -8,6 +8,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ### Development
 
 - Images for the README and documentation are built from scripts in `examples/` when the docs are built, and the tests run those scripts.
+- `uv.lock` covers Python 3.11 and newer only, which removes the locked Pillow 12.3.0 that has open security advisories (fixed in Pillow 13, which needs Python 3.11+).
+  Python 3.10 is still supported and tested, installed without the lockfile in CI and in `just compat`.
+- Python 3.13 is the default for development (`.python-version`) and for the lint, docs and build CI jobs.
 
 ## [0.2.1] - 2026-11-21
 
