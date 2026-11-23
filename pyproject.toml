@@ -119,3 +119,9 @@ dev = [
     "ruff>=0.17.6",
     "zensical>=0.0.52",
 ]
+
+[tool.uv]
+# Lock for Python 3.11+ only. Pillow 13 (which fixes the open Pillow advisories) needs 3.11+,
+# so locking 3.10 would keep a vulnerable Pillow 12 in uv.lock.
+# Python 3.10 is still supported and tested, installed without the lockfile in CI.
+environments = ["python_version >= '3.11'"]

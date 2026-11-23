@@ -47,7 +47,8 @@ compat:
         mpl=${spec%% *}
         np=""
         [[ "$spec" == *" "* ]] && np=${spec#* }
-        args=(--isolated --python 3.10)
+        # uv.lock only covers Python 3.11+, so skip the project and its lockfile
+        args=(--isolated --no-project --python 3.10 --with-editable . --with pytest --with defusedxml)
         if [[ "$mpl" == latest ]]; then args+=(--with matplotlib --upgrade); else args+=(--with "matplotlib==$mpl"); fi
         [[ -n "$np" ]] && args+=(--with "$np")
         printf '%-36s' "matplotlib $mpl ${np:+($np)}"
